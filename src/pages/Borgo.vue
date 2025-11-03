@@ -11,7 +11,7 @@ import b5 from '@/assets/photos/borgo/Borgo 5.JPG?w=1080&format=webp&imagetools'
 import b6 from '@/assets/photos/borgo/Borgo 6.JPG?w=1080&format=webp&imagetools';
 
 const images = [b1, b2, b3, b4, b5, b6];
-import bozza from '@/imgs/borgo.jpg';
+
 </script>
 
 <template>
@@ -19,8 +19,8 @@ import bozza from '@/imgs/borgo.jpg';
     <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
     <div class="grid grid-rows-[160px_625px_1fr] gap-[16px] h-full relative">
       <div class="flex items-center justify-center">
-                <BackHomeButton class="absolute top-5 left-5" />
-                <img :src="logoBorgo" class="h-[110%]" draggable="false"/>
+        <BackHomeButton class="absolute top-5 left-5" />
+        <img :src="logoBorgo" class="h-[110%]" draggable="false" />
       </div>
 
       <div class="border border-[#c9c9c9] -mt-[2px]">
@@ -43,5 +43,8 @@ import bozza from '@/imgs/borgo.jpg';
 
 <style lang="css">
 /* rimuovi qualsiasi raggio nel carosello */
-.carousel, .carousel img { border-radius: 0 !important; }
+.carousel,
+.carousel img {
+  border-radius: 0 !important;
+}
 </style>

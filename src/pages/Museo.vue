@@ -5,17 +5,18 @@ import img2 from '@/assets/photos/museo/Museo 2.jpg?w=1000&format=webp&imagetool
 import img3 from '@/assets/photos/museo/Museo 3.jpeg?w=1200&format=webp&imagetools';
 import img4 from '@/assets/photos/museo/Museo 4.jpg?w=1000&format=webp&imagetools';
 import museoLogo from '@/assets/logos/logo-museo-alt.png?w=400&imagetools';
-import qrMuseo from '@/assets/qrcodes/qrcode-museo.jpg?w=360&imagetools';
-import bozza from '@/imgs/museo.jpg';
+import qrMuseo from '@/assets/qrcodes/qrcode-museo.png?w=360&imagetools';
+
 </script>
 
 <template>
-    <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
+  <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
   <section class="h-full">
     <div class="grid grid-rows-[169px_1fr] h-full relative">
       <div class="flex w-full relative  justify-center">
         <BackHomeButton />
-        <img :src="museoLogo" alt="Museo di San Francesco di Paola" class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" draggable="false" />
+        <img :src="museoLogo" alt="Museo di San Francesco di Paola"
+          class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" draggable="false" />
       </div>
 
       <div class="grid grid-cols-[362px_1fr]  gap-3 mt-[5px] h-full min-h-0">
@@ -30,22 +31,26 @@ import bozza from '@/imgs/museo.jpg';
 
         <div class="grid grid-rows-[520px_625px] gap-3 h-full min-h-0">
           <div class="overflow-hidden min-h-0">
-            <img :src="hero1" alt="Museo - esposizione" class="w-full h-full object-cover object-center" draggable="false" />
+            <img :src="hero1" alt="Museo - esposizione" class="w-full h-full object-cover object-center"
+              draggable="false" />
           </div>
           <div class="grid grid-cols-[38.8%_1fr] gap-3 h-full min-h-0">
-  <div class="grid grid-rows-[3.6fr_2fr] gap-3 h-full min-h-0">
-    <div class="overflow-hidden min-h-0">
-      <img :src="img2" alt="Museo dettaglio 2" class="w-full h-full object-cover object-center" draggable="false" />
-    </div>
-    <div class="overflow-hidden min-h-0">
-      <img :src="img4" alt="Museo dettaglio 4" class="w-full h-full object-cover object-center" draggable="false" />
-    </div>
-  </div>
+            <div class="grid grid-rows-[3.6fr_2fr] gap-3 h-full min-h-0">
+              <div class="overflow-hidden min-h-0">
+                <img :src="img2" alt="Museo dettaglio 2" class="w-full h-full object-cover object-center"
+                  draggable="false" />
+              </div>
+              <div class="overflow-hidden min-h-0">
+                <img :src="img4" alt="Museo dettaglio 4" class="w-full h-full object-cover object-center"
+                  draggable="false" />
+              </div>
+            </div>
 
-  <div class="overflow-hidden min-h-0">
-    <img :src="img3" alt="Museo dettaglio 3" class="w-full h-full object-cover object-center" draggable="false" />
-  </div>
-</div>
+            <div class="overflow-hidden min-h-0">
+              <img :src="img3" alt="Museo dettaglio 3" class="w-full h-full object-cover object-center"
+                draggable="false" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ directories:
 
 files:
   - dist/**
-  - electron.js
+  - index.js
   - preload.js
   - package.json
 
