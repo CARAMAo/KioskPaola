@@ -1,5 +1,5 @@
 <script setup>
-import cityCoat from '@/assets/logos/logo-citta-di-paola.png';
+import cityCoat from '@/assets/logos/logo-citta-di-paola.png?w=400&imagetools';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 </script>
 

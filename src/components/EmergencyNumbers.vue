@@ -15,14 +15,11 @@ const contacts = [
 
 <template>
   <div
-    class="border-solid text-xl py-4 border-t-[7px] border-b-[7px] grid grid-flow-col grid-rows-3 gap-x-6 gap-y-2 justify-around items-stretch border-[blue] h-full"
-  >
+    class="border-solid text-xl py-4 border-t-[7px] border-b-[7px] grid grid-flow-col grid-rows-3 gap-x-6 gap-y-2 justify-around items-stretch border-brand h-full">
     <div v-for="(c, i) in contacts" :key="i" class="flex flex-col items-start justify-center">
       <span><strong class="inline">{{ c.number }}</strong> - {{ c.label }}</span>
     </div>
   </div>
 </template>
 
-<style>
-
-</style>
+<style></style>

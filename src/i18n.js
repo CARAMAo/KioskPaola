@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n';
 
 const STORAGE_KEY = 'active-language';
-const initial = (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY)) || 'it';
+const initial = 'it';
 
 export const i18n = createI18n({
   legacy: false,
@@ -38,9 +38,12 @@ try {
 // Bootstrap: carica tutto dai locali esposti da Electron
 (function bootstrapI18n() {
   try {
+
     const api = typeof window !== 'undefined' && window.api;
     if (api && typeof api.getAllLocales === 'function') {
+        
       const all = api.getAllLocales();
+
       installAllLocales(all);
       // imposta lingua iniziale se disponibile, altrimenti prima disponibile
       if (all && all[initial]) {

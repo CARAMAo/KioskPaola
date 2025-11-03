@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import flagIt from '@/assets/logos/lang-it.png';
-import flagEn from '@/assets/logos/lang-en.png';
+import flagIt from '@/assets/logos/lang-it.png?w=144&imagetools';
+import flagEn from '@/assets/logos/lang-en.png?w=144&imagetools';
 
 const LANG_STORAGE_KEY = 'active-language';
 

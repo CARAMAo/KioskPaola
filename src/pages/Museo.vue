@@ -1,11 +1,11 @@
 <script setup>
 import BackHomeButton from '@/components/BackHomeButton.vue';
-import hero1 from '@/assets/photos/museo/Museo 1.jpeg';
-import img2 from '@/assets/photos/museo/Museo 2.jpg';
-import img3 from '@/assets/photos/museo/Museo 3.jpeg';
-import img4 from '@/assets/photos/museo/Museo 4.jpg';
-import museoLogo from '@/assets/logos/logo-museo-alt.png';
-import qrMuseo from '@/assets/qrcodes/qrcode-museo.jpg';
+import hero1 from '@/assets/photos/museo/Museo 1.jpeg?w=1080&format=webp&imagetools';
+import img2 from '@/assets/photos/museo/Museo 2.jpg?w=1000&format=webp&imagetools';
+import img3 from '@/assets/photos/museo/Museo 3.jpeg?w=1200&format=webp&imagetools';
+import img4 from '@/assets/photos/museo/Museo 4.jpg?w=1000&format=webp&imagetools';
+import museoLogo from '@/assets/logos/logo-museo-alt.png?w=400&imagetools';
+import qrMuseo from '@/assets/qrcodes/qrcode-museo.jpg?w=360&imagetools';
 import bozza from '@/imgs/museo.jpg';
 </script>
 
@@ -15,7 +15,7 @@ import bozza from '@/imgs/museo.jpg';
     <div class="grid grid-rows-[169px_1fr] h-full relative">
       <div class="flex w-full relative  justify-center">
         <BackHomeButton />
-        <img :src="museoLogo" alt="Museo di San Francesco di Paola" class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" />
+        <img :src="museoLogo" alt="Museo di San Francesco di Paola" class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" draggable="false" />
       </div>
 
       <div class="grid grid-cols-[362px_1fr]  gap-3 mt-[5px] h-full min-h-0">
@@ -24,26 +24,26 @@ import bozza from '@/imgs/museo.jpg';
 
           <div class="flex flex-col  mb-14 items-center gap-12 self-end">
             <div class="text-text text-[16px] uppercase">{{ $t('common.moreInfoSite') }}</div>
-            <img :src="qrMuseo" alt="QR Museo" class="w-[180px] h-[180px] object-contain" />
+            <img :src="qrMuseo" alt="QR Museo" class="w-[180px] h-[180px] object-contain" draggable="false" />
           </div>
         </div>
 
         <div class="grid grid-rows-[520px_625px] gap-3 h-full min-h-0">
           <div class="overflow-hidden min-h-0">
-            <img :src="hero1" alt="Museo - esposizione" class="w-full h-full object-cover object-center" />
+            <img :src="hero1" alt="Museo - esposizione" class="w-full h-full object-cover object-center" draggable="false" />
           </div>
           <div class="grid grid-cols-[38.8%_1fr] gap-3 h-full min-h-0">
   <div class="grid grid-rows-[3.6fr_2fr] gap-3 h-full min-h-0">
     <div class="overflow-hidden min-h-0">
-      <img :src="img2" alt="Museo dettaglio 2" class="w-full h-full object-cover object-center" />
+      <img :src="img2" alt="Museo dettaglio 2" class="w-full h-full object-cover object-center" draggable="false" />
     </div>
     <div class="overflow-hidden min-h-0">
-      <img :src="img4" alt="Museo dettaglio 4" class="w-full h-full object-cover object-center" />
+      <img :src="img4" alt="Museo dettaglio 4" class="w-full h-full object-cover object-center" draggable="false" />
     </div>
   </div>
 
   <div class="overflow-hidden min-h-0">
-    <img :src="img3" alt="Museo dettaglio 3" class="w-full h-full object-cover object-center" />
+    <img :src="img3" alt="Museo dettaglio 3" class="w-full h-full object-cover object-center" draggable="false" />
   </div>
 </div>
         </div>

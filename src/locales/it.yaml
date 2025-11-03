@@ -7,21 +7,21 @@ common:
 museo:
   text: |
     Il Museo di San Francesco di Paola, situato nel cuore del centro storico, offre al visitatore un percorso suggestivo che intreccia storia, spiritualità e innovazione tecnologica. Dieci sale tematiche e una galleria finale guidano in un viaggio emozionante alla scoperta della vita, del culto e dell’eredità universale del Santo.
-    
+
     L’esperienza inizia nella sala Accoglienza, in cui un plastico della città e un monitor interattivo introducono alle principali testimonianze storiche e culturali del territorio. Da qui si accede alla sala “Il Santuario com’era e com’è”: qui, un tavolo multitouch racconta, attraverso immagini e filmati, l’evoluzione del Santuario di Paola nel corso dei secoli.
-    
+
     La sala dedicata alla diffusione del culto nel mondo amplia lo sguardo oltre i confini locali: due tavoli interattivi e un grande planisfero mostrano come la devozione a San Francesco abbia raggiunto numerosi Paesi, trasformandosi in un patrimonio condiviso da culture diverse.
-    
+
     Il percorso prosegue nella sala “Minimi e Reliquie”, dove si approfondisce la storia dell’Ordine fondato dal Santo. Una suggestiva piramide olografica offre al visitatore la ricostruzione 3d delle reliquie custodite nel Santuario.
-    
+
     Due ambienti successivi raccontano il forte legame con le comunità locali: le sale del Patronato della Sicilia e del Patronato della Calabria, arricchite da pannelli e videoproiezioni, testimoniano la profonda devozione che lega il Santo alle genti delle due regioni.
-    
+
     Il Patronato della gente di mare trova invece espressione in un’esperienza di realtà virtuale: indossando un visore, è possibile rivivere il celebre miracolo del mantello, simbolo di protezione per chi affronta il mare.
-    
+
     La sala dedicata alla Beatificazione e Canonizzazione è caratterizzata dalla presenza di una proiezione su leggio che mostra la bolla papale con cui Francesco fu proclamato Santo, restituendo la solennità di quel momento storico.
-    
+
     Il percorso culmina nella Galleria finale, dove un allestimento emozionale fatto di pannelli e contenuti multimediali accompagna il visitatore in una riflessione intima sul duplice volto di Francesco: uomo e santo. 
-    
+
     A completare l’esperienza si trovano la sala convegni, dotata di angolo lettura e tavolo interattivo per consultare volumi digitali, e il bookshop, che consente di portare con sé un ricordo della visita e approfondire ulteriormente la conoscenza del Santo.
 
 santuario:
@@ -30,7 +30,7 @@ santuario:
   text1: |
     Il Santuario di san Francesco di Paola ha una lunga storia, che affonda le sue radici nel lontano secolo XV, attorno agli anni 1435-1452. Quando si cominciarono ad aggregare i primi seguaci, Francesco maturò l’idea di realizzare una piccola chiesa, tipica di ogni romitorio, come luogo di preghiera per gli eremiti e per i fedeli che vi giungevano. Il “primitivo oratorio” oggi fa parte dei sotterranei del convento e si accede ad esso da una piccola scalinata in prossimità del chiostro. Fu costruito circa nel 1436 sulla sponda sinistra del fiume Isca, distante approssimativamente 60 metri dalla sua grotta.
     Trascorsi i primi anni di stretto eremitaggio nell’antico romitorio, il numero di seguaci del Paolano cominciò a crescere e il “primitivo oratorio” si rivelò insufficiente. Così, intorno al 1452, Francesco mise mano alla costruzione della Chiesa. In base a testimonianze coeve, pare che l’idea iniziale fosse quella di realizzare una struttura piccola e dalle forme anguste. Tuttavia, a seguito dell’apparizione di un Frate (il Santo d’Assisi, secondo l’interpretazione più diffusa), che suggerì di allargare il perimetro della Chiesa perché sarebbe destinata ad accogliere un numero sempre crescente di fedeli, Francesco modificò il progetto, ne ampliò il perimetro e lo realizzò in poco tempo grazie alla Provvidenza e alla generosità di alcuni gentiluomini cosentini.
-  
+
   text2: |
     La vita di san Francesco iniziò il 27 marzo del 1416. Giacomo Martolilla e Vienna da Fuscaldo, genitori dell’eremita calabrese, vivevano a Paola, un villaggio di circa un migliaio di abitanti affacciato sulla costa tirrenica, e si dedicavano al lavoro dei campi e a quello casalingo. Secondo la tradizione, l’evento della nascita fu accompagnato da segni straordinari: la gente del luogo vide delle lingue di fuoco – la vampa – sulla casa in cui Vienna stava dando alla luce Francesco. 
     Compiuti i quindici anni di età, Francesco fu accompagnato dai genitori al convento francescano di San Marco Argentano per sciogliere il voto. Per un anno restò insieme ai frati come oblato. In seguito Francesco espresse ai suoi genitori la volontà di compiere un pellegrinaggio ad Assisi per chiedere ancora una volta al suo Santo protettore di poter comprendere la sua vocazione. Ritornato a Paola, il giovane manifestò apertamente la sua risoluta decisione: voleva lasciare la famiglia per servire il Signore come eremita. Non tornò neanche a casa, ma si fermò direttamente in un podere di proprietà della famiglia, per fissare lì la sua nuova dimora. Era probabilmente il 1435; Francesco aveva circa 19 anni e con determinazione si ritirò nell’area dove ora sorge il Santuario, avendo come suo unico rifugio una piccola grotta, scavata in una zona boscosa.
@@ -44,7 +44,7 @@ borgo:
   text1: |
     Centro costiero posto sul declivio delle propaggini occidentali, si estende dall’attuale rocca del Castello fino al mare.
     La città è dominata dal Castello, la cui presenza è testimoniata dai resti della città fortificata, e dal Santuario – Basilica di San Francesco, posto esternamente all’abitato nei pressi del torrente Isca, e costruito in più fasi, a partire dal 1469. Il “Castrum” di età normanna è rappresentato dal castello e dalla torre cilindrica (oggi unico elemento superstite tra i ruderi del maniero). La torre al suo interno presenta una particolarità che è data dalla pianta ottagonale al primo piano, con una volta a spicchi, ritenuta di impronta culturale sveva, di età federiciana.
-    Il centro di Paola presenta un percorso di crinale (SS18 Salerno-Reggio Calabria) e controcrinale (Via Nazionale) ed è strutturato a quartieri denominati: Motta; Baracche; Pietre Bianche; Rupa; Cancello; Spagnuolo. Punto di belvedere: Piazza Sette Fontane. Duomo, intitolato alla SS. Annunziata e situato nel centro storico. 
+    Il centro di Paola presenta un percorso di crinale (SS18 Salerno-Reggio Calabria) e controcrinale (Via Nazionale) ed è strutturato a quartieri denominati: Motta; Baracche; Pietre Bianche; Rupa; Cancello; Spagnuolo. Punto di belvedere: Piazza Sette Fontane. Duomo, intitolato alla SS. Annunziata e situato nel centro storico.
   text2: |
     Nel 1982, in zona Cutura, situata a nord di Paola, sono stati rinvenuti resti romani di età imperiale che attestano una frequentazione dell’area in tempi remoti.
     Durante la dominazione Bizantina il territorio di Paola diventò possedimento bizantino e questo determinò il passaggio di queste zone al culto.
@@ -54,7 +54,6 @@ borgo:
     Paola beneficiò del regno di Federico II di Svevia e iniziò progressivamente a ingrandirsi e a crescere d’importanza fino a che, quando la Calabria passò dal dominio Svevo a quello Angioino questi non ne favorirono il concentramento della popolazione, toccata dal lungo conflitto, in zone meglio protette (creando l’odierno centro storico) e difendibili che all’epoca si trasformarono in feudo, e fu affidato alla famiglia Ruffo di Montalto, poi Principi di Rossano. Dai Casali fuscaldesi di San Michele (intorno al Monastero di San Michele Arcangelo) e Fosse (Monastero intorno a Santa Maria delle Fosse, oggi periferia di Paola), gli abitanti si trasferirono nel casale di Paola, più sicuro.
     Nel 1496 Ferrante II d’Aragona confiscò il feudo al conte di Montalto per alienarlo “in perpetuum” a Giovan Battista Spinelli conte di Cariati e duca di Castrovillari “consiliario etoratori suo dilectissimo”. L’intervento degli Spinelli si tradusse in una migliore organizzazione del territorio che influì positivamente sull’agricoltura. Nel 1567 il feudo fu venduto ai marchesi Spinelli di Fuscaldo che lo tennero fino all’eversione della feudalità (1806)
 
-
 cammino:
   associazioneHeading: l’associazione
   text1: |
@@ -63,10 +62,6 @@ cammino:
     Attualmente, l’Associazione cura la promozione, la diffusione, l’organizzazione della rete dell’ospitalità, la distribuzione delle credenziali e la manutenzione della segnaletica del Cammino. Inoltre, coordina la rete di altre associazioni, istituzioni, soggetti pubblici e privati che hanno manifestato un interesse verso il Cammino.
 
     mail: info@ilcamminodisanfrancesco.it
-
-
-
-
 
   tappeHeading: L’INTERO CAMMINO - LE TAPPE
   tappeSubheading: Da San Marco Argentano a Paterno Calabro
@@ -93,11 +88,11 @@ cammino:
   viaFranciaHeading: "4. LA VIA PER LA FRANCIA"
   viaFranciaSubheading: "Corigliano Calabro - Monte S. Angelo (bidirezionale); 71,6 km in 3 tappe (13-15)"
   viaFranciaText: |
-    L’itinerario accompagna san Francesco fino ai confini della Calabria. Dalla cima di Monte Sant’Angelo, nel Massiccio del Pollino, il Frate saluta la sua amata terra, imprimento le sue orme sulla roccia. 
-    
+    L’itinerario accompagna san Francesco fino ai confini della Calabria. Dalla cima di Monte Sant’Angelo, nel Massiccio del Pollino, il Frate saluta la sua amata terra, imprimento le sue orme sulla roccia.
+
   contacts:
     address: "L.go San Francesco di Paola 1 - Paola (CS) 87027"
-    email: "info@santuariopaola.it"
+    email: "info@@santuariopaola.it"
     telephone: "+(39) 0982 582518"
 
 home:

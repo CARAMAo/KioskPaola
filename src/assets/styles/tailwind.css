@@ -11,8 +11,8 @@
     --color-primary: rgb(29,43,78);
     --color-primary-contrast: #f3f6ff;
     --color-accent: rgb(200,146,19);
-    --color-text: #0d1f44;
-    --color-text-muted: rgba(84,86,114,.7);
+    --color-text: #000;
+    --color-text-muted: rgba(84, 86, 114, 0.895);
     user-select: none;
   }
 }

@@ -1,9 +1,46 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import TopBar from '@/components/TopBar.vue';
 import EmergencyNumbers from '@/components/EmergencyNumbers.vue';
 import Sponsors from '@/components/Sponsors.vue';
 import FootBar from './components/FootBar.vue';
+
+
+const router = useRouter();
+const IDLE_SECONDS = 60;
+let idleTimeout = null; //handlerTimeout
+let lastResetAt = 0;
+
+function goHomeIfNeeded() {
+  const path = router.currentRoute.value?.path || '';
+  if (path !== '/') {
+    router.replace('/');
+  }
+}
+
+function clearIdleTimeout() {
+  if (idleTimeout) {
+    clearTimeout(idleTimeout);
+    idleTimeout = null;
+  }
+}
+
+function scheduleIdleTimeout() {
+  clearIdleTimeout();
+  idleTimeout = setTimeout(() => {
+    goHomeIfNeeded();
+    clearIdleTimeout();
+  }, IDLE_SECONDS * 1000);
+}
+
+function resetInactivity() {
+  const now = Date.now();
+  // Throttle resets to avoid excessive work on move events
+  if (now - lastResetAt < 200) return;
+  lastResetAt = now;
+  scheduleIdleTimeout();
+}
 
 const BASE_WIDTH = 1080;
 const BASE_HEIGHT = 1920;
@@ -30,11 +67,22 @@ if (typeof window !== 'undefined') {
 onMounted(() => {
   applyScale();
   window.addEventListener('resize', applyScale);
-  
+  // Inactivity tracking (touch kiosk)
+  scheduleIdleTimeout();
+  const opts = { passive: true };
+  window.addEventListener('pointerdown', resetInactivity, opts);
+  window.addEventListener('pointermove', resetInactivity, opts);
+  window.addEventListener('keydown', resetInactivity, opts);
+  window.addEventListener('wheel', resetInactivity, opts);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', applyScale);
+  clearIdleTimeout();
+  window.removeEventListener('pointerdown', resetInactivity);
+  window.removeEventListener('pointermove', resetInactivity);
+  window.removeEventListener('keydown', resetInactivity);
+  window.removeEventListener('wheel', resetInactivity);
 });
 
 
@@ -45,13 +93,15 @@ onBeforeUnmount(() => {
 
 
   <div class="app-wrapper">
-      <div class="absolute top-6 left-6 text-3xl text-red-500">
-    {{ timer }}
-  </div>
     <TopBar />
     <main class="content">
-      <router-view />
-      
+      <router-view v-slot="{ Component, route }">
+        <KeepAlive>
+          <Transition name="fade">
+            <component :is="Component" :key="route.fullPath" />
+          </Transition>
+        </KeepAlive>
+      </router-view>
     </main>
     <FootBar />
   </div>
@@ -114,5 +164,39 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  position: relative;
+}
+
+/* Page slide+fade transition (overlapped) */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 240ms ease, transform 240ms ease;
+  position: absolute;
+  inset: 0;
+}
+
+.fade-enter-from {
+  opacity: 0;
+
+}
+
+.fade-enter-to {
+  opacity: 1;
+
+}
+
+.fade-leave-from {
+  opacity: 1;
+
+}
+
+.fade-leave-to {
+  opacity: 0;
+
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>

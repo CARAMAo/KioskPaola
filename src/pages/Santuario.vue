@@ -1,9 +1,9 @@
 <script setup>
 import BackHomeButton from '@/components/BackHomeButton.vue';
-import hero from '@/assets/photos/santuario/santuario.jpg';
-import logo from '@/assets/logos/logo-santuario.jpg';
+import hero from '@/assets/photos/santuario/santuario.jpg?w=1080&format=webp&imagetools';
+import logo from '@/assets/logos/logo-santuario.jpg?w=600&imagetools';
 import bozza from '@/imgs/santuario.jpg';
-import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png'
+import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png?w=260&imagetools'
 </script>
 
 <template>
@@ -12,7 +12,7 @@ import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png'
     <div class="grid grid-rows-[160px_auto_155px] gap-3 h-full relative">
       <div class="flex items-center justify-center">
         <BackHomeButton />
-        <img :src="logo" alt="Basilica Santuario San Francesco di Paola" class="h-full object-contain" />
+        <img :src="logo" alt="Basilica Santuario San Francesco di Paola" class="h-full object-contain" draggable="false" />
       </div>
 
       
@@ -23,7 +23,7 @@ import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png'
             <h2 class="totem-h2 tracking-[0.06rem] leading-[1rem]">{{ $t('santuario.heading') }}</h2>
             <p class="totem-p leading-[16.18px] tracking-[0.0rem]">{{ $t('santuario.text1') }}</p>
           </article>
-          <img :src="hero" alt="Santuario di San Francesco di Paola" class="w-[100%] h-[485px] object-cover float-right" />
+          <img :src="hero" alt="Santuario di San Francesco di Paola" class="w-[100%] h-[485px] object-cover float-right" draggable="false" />
           
           <article class="col-span-2">
             <h2 class="totem-h2">{{ $t('santuario.heading2') }}</h2>
@@ -39,7 +39,7 @@ import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png'
 
         </div>
         <div class="border-solid border-t-[2px] border-t-blue-950 grid grid-cols-[34%_1fr]  pt-4 font-serif text-[40px] items-center">
-          <div class=" justify-self-end"  ><img :src="qrCodeSantuario" width="130"  /></div>
+          <div class=" justify-self-end"  ><img :src="qrCodeSantuario" width="130" draggable="false"  /></div>
           <div class="pl-11">www.santuariopaola.it</div>
         </div>
     </div>

@@ -25,6 +25,22 @@ let timerId = null;
 
 const currentImage = computed(() => props.images[currentIndex.value] ?? null);
 
+// Preload & decode images to avoid blank during switch
+const preloadCache = new Map();
+function preloadImage(url) {
+  if (!url) return Promise.resolve();
+  if (preloadCache.has(url)) return preloadCache.get(url);
+  const img = new Image();
+  img.src = url;
+  const p = img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+  preloadCache.set(url, p);
+  return p;
+}
+
+function preloadAll(urls) {
+  urls.forEach((u) => preloadImage(u));
+}
+
 const startAutoplay = () => {
   if (!props.autoplay || props.images.length <= 1) {
     return;
@@ -32,7 +48,10 @@ const startAutoplay = () => {
 
   stopAutoplay();
   timerId = window.setInterval(() => {
-    currentIndex.value = (currentIndex.value + 1) % props.images.length;
+    const next = (currentIndex.value + 1) % props.images.length;
+    // Fire-and-forget preload of the next image
+    preloadImage(props.images[next]);
+    currentIndex.value = next;
   }, props.interval);
 };
 
@@ -45,9 +64,13 @@ const stopAutoplay = () => {
 
 const goTo = (index) => {
   currentIndex.value = index;
+  const next = (index + 1) % props.images.length;
+  preloadImage(props.images[next]);
 };
 
 onMounted(() => {
+  preloadAll(props.images);
+  if (props.images.length) preloadImage(props.images[0]);
   startAutoplay();
 });
 
@@ -58,20 +81,28 @@ onBeforeUnmount(() => {
 watch(
   () => [props.interval, props.autoplay, props.images.length],
   () => {
+    preloadAll(props.images);
     startAutoplay();
   }
 );
+
+watch(currentIndex, (i) => {
+  const next = (i + 1) % props.images.length;
+  preloadImage(props.images[next]);
+});
 </script>
 
 <template>
   <div class="carousel">
-    <transition name="carousel-fade" mode="out-in">
+    <transition name="carousel-fade">
       <img
         v-if="currentImage"
         :key="currentImage"
         :src="currentImage"
         alt=""
         class="carousel__image"
+        decoding="async"
+        loading="eager"
         draggable="false"
       />
     </transition>
@@ -101,10 +132,14 @@ watch(
 }
 
 .carousel__image {
-  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  width: 100%;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: opacity;
 }
 
 .carousel__indicators {
@@ -135,7 +170,7 @@ watch(
 
 .carousel-fade-enter-active,
 .carousel-fade-leave-active {
-  transition: opacity 0.6s ease;
+  transition: opacity 0.4s ease;
 }
 
 .carousel-fade-enter-from,

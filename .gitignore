@@ -1,5 +1,6 @@
 dist
 node_modules
 orari-bus
-./locales
+locales
 TOTEM
+dist_electron

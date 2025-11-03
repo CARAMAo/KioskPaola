@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
+import { imagetools } from 'vite-imagetools';
 
-export default defineConfig({
-  plugins: [vue()],
+export default defineConfig(({ command }) => ({
+  plugins: [vue(),imagetools()],
   root: '.',
-  base: './',
+  // In dev serve from '/', in build use './' for file-based loading
+  base: command === 'serve' ? '/' : './',
   build: {
     outDir: 'dist',
   },
@@ -15,6 +17,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    host: '127.0.0.1',
+    port: 4000,
   },
-});
+}));

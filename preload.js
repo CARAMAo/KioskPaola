@@ -5,12 +5,12 @@ const yaml = require('js-yaml');
 
 function resolveBusDir() {
   try {
-    // In produzione: cartella accanto all'eseguibile
-    const prodBase = path.dirname(process.execPath);
+    // In produzione: cartella accanto all'eseguibile (gestisce anche "portable")
+    const prodBase = process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
     const prodDir = path.join(prodBase, 'orari-bus');
     if (fs.existsSync(prodDir)) return prodDir;
   } catch (_) {}
-
+  
   try {
     // In sviluppo: root del progetto (cwd)
     const devDir = path.join(process.cwd(), 'orari-bus');
@@ -25,9 +25,7 @@ function resolveBusDir() {
 
   return null;
 }
-
 function loadBusPdfs() {
-  console.log('[preload] loadBusPdfs called');
   const dir = resolveBusDir();
   if (!dir) {
     console.warn('[preload] orari-bus directory not found');
@@ -54,41 +52,62 @@ function loadBusPdfs() {
   return map;
 }
 
-function resolveLocalesDir() {
+function resolveSponsorsDir(){
   try {
-    const ext = path.join(path.dirname(process.execPath), 'locales');
-    if (fs.existsSync(ext)) return ext;
+    const port = process.env.PORTABLE_EXECUTABLE_DIR && path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'sponsors');
+    if (port && fs.existsSync(port)) return port;
+  } catch (_) {}
+  try {
+    const dev = path.join(process.cwd(), 'sponsors');
+    if (fs.existsSync(dev)) return dev;
+  } catch (_) {}
+
+  return null;
+}
+
+function loadSponsorsImgs(){
+    const dir = resolveSponsorsDir();
+  if (!dir) {
+    console.warn('[preload] sponsors directory not found');
+  } else {
+    console.log('[preload] Using sponsors dir:', dir);
+  }
+  const sponsors = []
+  if (!dir) return sponsors;
+  try {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    for (const f of files) {
+      if (!f.isFile()) continue;
+      const ext = path.extname(f.name).toLowerCase();
+      if (ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') continue;
+      
+      const data = fs.readFileSync(path.join(dir, f.name));
+      sponsors.push(data.toString('base64'));
+    }
+    console.log('[preload] Sponsors found:', Object.length(map));
+  } catch (e) {
+    console.error('Error reading sponsors', e);
+  }
+  return sponsors;
+}
+
+
+function resolveLocalesDir() {
+
+  try {
+    const port = process.env.PORTABLE_EXECUTABLE_DIR && path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'locales');
+    if (port && fs.existsSync(port)) return port;
   } catch (_) {}
   try {
     const dev = path.join(process.cwd(), 'locales');
     if (fs.existsSync(dev)) return dev;
   } catch (_) {}
-  try {
-    const res = path.join(process.resourcesPath || '', 'locales');
-    if (fs.existsSync(res)) return res;
-  } catch (_) {}
+
   return null;
 }
 
 contextBridge.exposeInMainWorld('api', {
-  // Legge un singolo locale (yaml/json) dalla cartella esterna
-  readLocale: (lang) => {
-    try {
-      const base = resolveLocalesDir();
-      if (!base) return null;
-      const candidates = [
-        path.join(base, `${lang}.yaml`),
-        path.join(base, `${lang}.yml`),
-        path.join(base, `${lang}.json`),
-      ];
-      for (const p of candidates) {
-        if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
-      }
-    } catch (e) {
-      console.error('readLocale error', e);
-    }
-    return null;
-  },
+  getSponsors: () => loadSponsorsImgs(),
   // Restituisce entrambi i locales (se presenti) in un'unica chiamata
   getAllLocales: () => {
     try {

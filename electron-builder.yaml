@@ -20,11 +20,17 @@ extraResources:
     filter:
       - it.yaml
       - en.yaml
+  # Include default bus PDFs outside asar under resources/bus-pdfs
+  - from: src/bus-pdfs
+    to: bus-pdfs
+    filter:
+      - "*.pdf"
 
 win:
   target:
     - portable
   artifactName: kiosk.exe
+  signAndEditExecutable: false
 
 # Disabilita qualsiasi publish automatico
 publish:

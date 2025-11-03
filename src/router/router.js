@@ -1,18 +1,14 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import Home from '@/pages/Home.vue';
-import Borgo from '@/pages/Borgo.vue';
-import Santuario from '@/pages/Santuario.vue';
-import Museo from '@/pages/Museo.vue';
-import Cammino from '@/pages/Cammino.vue';
-import PDF from '@/pages/PDF.vue';
+
 
 const routes = [
   { path: '/', component: Home },
-  { path: '/borgo', component: Borgo },
-  { path: '/santuario', component: Santuario },
-  { path: '/museo', component: Museo },
-  { path: '/cammino', component: Cammino },
-  { path: '/orari-bus/:filename?', component: PDF },
+  { path: '/borgo', component: () => import("@/pages/Borgo.vue")},
+  { path: '/santuario',  component: () => import("@/pages/Santuario.vue")},
+  { path: '/museo',  component: () => import("@/pages/Museo.vue")},
+  { path: '/cammino',  component: () => import("@/pages/Cammino.vue")},
+  { path: '/orari-bus/',  component: () => import("@/pages/PDF.vue")},
 ];
 
 export default createRouter({

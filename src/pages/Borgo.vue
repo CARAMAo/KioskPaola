@@ -1,14 +1,14 @@
 <script setup>
 import BackHomeButton from '@/components/BackHomeButton.vue';
 import ImageCarousel from '@/components/ImageCarousel.vue';
-import logoBorgo from '@/assets/logos/logo-borgo.png'
+import logoBorgo from '@/assets/logos/logo-borgo.png?w=500&imagetools'
 
-import b1 from '@/assets/photos/borgo/Borgo 1.JPG';
-import b2 from '@/assets/photos/borgo/Borgo 2.JPG';
-import b3 from '@/assets/photos/borgo/Borgo 3.JPG';
-import b4 from '@/assets/photos/borgo/Borgo 4.JPG';
-import b5 from '@/assets/photos/borgo/Borgo 5.JPG';
-import b6 from '@/assets/photos/borgo/Borgo 6.JPG';
+import b1 from '@/assets/photos/borgo/Borgo 1.JPG?w=1080&format=webp&imagetools';
+import b2 from '@/assets/photos/borgo/Borgo 2.JPG?w=1080&format=webp&imagetools';
+import b3 from '@/assets/photos/borgo/Borgo 3.JPG?w=1080&format=webp&imagetools';
+import b4 from '@/assets/photos/borgo/Borgo 4.JPG?w=1080&format=webp&imagetools';
+import b5 from '@/assets/photos/borgo/Borgo 5.JPG?w=1080&format=webp&imagetools';
+import b6 from '@/assets/photos/borgo/Borgo 6.JPG?w=1080&format=webp&imagetools';
 
 const images = [b1, b2, b3, b4, b5, b6];
 import bozza from '@/imgs/borgo.jpg';
@@ -20,7 +20,7 @@ import bozza from '@/imgs/borgo.jpg';
     <div class="grid grid-rows-[160px_625px_1fr] gap-[16px] h-full relative">
       <div class="flex items-center justify-center">
                 <BackHomeButton class="absolute top-5 left-5" />
-                <img :src="logoBorgo" class="h-[110%]"/>
+                <img :src="logoBorgo" class="h-[110%]" draggable="false"/>
       </div>
 
       <div class="border border-[#c9c9c9] -mt-[2px]">
