@@ -10,7 +10,7 @@ function createWindow() {
 
   const windowHeight = displayHeight;
   const windowWidth = Math.round((windowHeight * 9) / 16);
-  const horizontalPadding = Math.round(windowHeight * 0.05);
+  const horizontalPadding = 0 ;
   const initialWidth = Math.min(windowWidth + horizontalPadding, availableWidth);
 
   const win = new BrowserWindow({

@@ -1,0 +1,32 @@
+appId: com.kioskpaola.app
+productName: KioskPaola
+asar: true
+
+forceCodeSigning: false
+
+directories:
+  output: dist_electron
+
+files:
+  - dist/**
+  - electron.js
+  - preload.js
+  - package.json
+
+# Copia i file di localizzazione fuori dall'asar in resources/locales
+extraResources:
+  - from: src/locales
+    to: locales
+    filter:
+      - it.yaml
+      - en.yaml
+
+win:
+  target:
+    - portable
+  artifactName: kiosk.exe
+
+# Disabilita qualsiasi publish automatico
+publish:
+  provider: generic
+  url: ""
