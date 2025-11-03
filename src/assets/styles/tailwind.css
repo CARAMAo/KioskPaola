@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Opzionale: sposta qui le CSS variables, oppure lascia quelle già in src/App.vue */
+@layer base {
+  :root {
+    --color-background: #f3f6ff;
+    --color-surface: #ffffff;
+    --color-surface-subtle: #e8ecf6;
+    --color-primary: rgb(29,43,78);
+    --color-primary-contrast: #f3f6ff;
+    --color-accent: rgb(200,146,19);
+    --color-text: #0d1f44;
+    --color-text-muted: rgba(84,86,114,.7);
+    user-select: none;
+  }
+}
+
+@layer base {
+  /* Grenze static weights (TTF) */
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-ThinItalic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-ExtraLight.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-ExtraLightItalic.ttf') format('truetype');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-BoldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-ExtraBoldItalic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Grenze';
+    src: url('../fonts/grenze/Grenze-BlackItalic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+  }
+}
+
+@layer components {
+.totem-h2 {
+@apply text-accent font-[600] tracking-wide uppercase;
+}
+.totem-p {
+@apply text-text text-[13.5px] hyphens-auto whitespace-pre-line leading-[16.5px] tracking-[-0.07px];
+}
+}

@@ -1,0 +1,109 @@
+const { contextBridge } = require('electron');
+const fs = require('fs');
+const path = require('path');
+const yaml = require('js-yaml');
+
+function resolveBusDir() {
+  try {
+    // In produzione: cartella accanto all'eseguibile
+    const prodBase = path.dirname(process.execPath);
+    const prodDir = path.join(prodBase, 'orari-bus');
+    if (fs.existsSync(prodDir)) return prodDir;
+  } catch (_) {}
+
+  try {
+    // In sviluppo: root del progetto (cwd)
+    const devDir = path.join(process.cwd(), 'orari-bus');
+    if (fs.existsSync(devDir)) return devDir;
+  } catch (_) {}
+
+  try {
+    // In sviluppo: vicino a questo file preload.js
+    const hereDir = path.join(__dirname, 'orari-bus');
+    if (fs.existsSync(hereDir)) return hereDir;
+  } catch (_) {}
+
+  return null;
+}
+
+function loadBusPdfs() {
+  console.log('[preload] loadBusPdfs called');
+  const dir = resolveBusDir();
+  if (!dir) {
+    console.warn('[preload] orari-bus directory not found');
+  } else {
+    console.log('[preload] Using orari-bus dir:', dir);
+  }
+  const map = {};
+  if (!dir) return map;
+  try {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    for (const f of files) {
+      if (!f.isFile()) continue;
+      const ext = path.extname(f.name).toLowerCase();
+      if (ext !== '.pdf') continue;
+      const name = path.basename(f.name, ext);
+      
+      const data = fs.readFileSync(path.join(dir, f.name));
+      map[name] = data.toString('base64');
+    }
+    console.log('[preload] PDFs found:', Object.keys(map));
+  } catch (e) {
+    console.error('Error reading orari-bus PDFs', e);
+  }
+  return map;
+}
+
+contextBridge.exposeInMainWorld('api', {
+  // Lettura congiunta dei locali da PWD/locales (it/en) in un'unica risposta
+  getAllLocales: () => {
+    try {
+      const base = path.join(process.cwd(), 'locales');
+      const out = {};
+      const readYaml = (p) => {
+        try {
+          if (fs.existsSync(p)) {
+            const raw = fs.readFileSync(p, 'utf8');
+            return yaml.load(raw) || {};
+          }
+        } catch (e) {
+          console.error('[preload] getAllLocales parse error for', p, e);
+        }
+        return undefined;
+      };
+
+      const it = readYaml(path.join(base, 'it.yaml'));
+      if (it) out.it = it;
+      const en = readYaml(path.join(base, 'en.yaml'));
+      if (en) out.en = en;
+      return out;
+    } catch (e) {
+      console.error('[preload] getAllLocales error', e);
+      return {};
+    }
+  },
+  // Lettura file di localizzazione da filesystem vicino all'eseguibile
+  getLocales: () => {
+    try {
+      const candidates = [];
+
+      if (process.resourcesPath) {
+        candidates.push(path.join(process.resourcesPath, 'locales', `${lang}.yaml`));
+        candidates.push(path.join(process.resourcesPath, 'locales', `${lang}.yml`));
+      }
+
+      for (const p of candidates) {
+        if (fs.existsSync(p)) {
+          return fs.readFileSync(p, 'utf8');
+        }
+      }
+    } catch (e) {
+      console.error('readLocale error', e);
+    }
+    return null;
+  },
+  // Ritorna un oggetto { <nomePdfSenzaEstensione>: <base64> }
+  getBusPdfs: () => {
+    return loadBusPdfs();
+  },
+});
