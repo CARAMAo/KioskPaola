@@ -1,5 +1,4 @@
 <script setup>
-import BackHomeButton from '@/components/BackHomeButton.vue';
 import hero1 from '@/assets/photos/museo/Museo 1.jpeg?w=1080&format=webp&imagetools';
 import img2 from '@/assets/photos/museo/Museo 2.jpg?w=1000&format=webp&imagetools';
 import img3 from '@/assets/photos/museo/Museo 3.jpeg?w=1200&format=webp&imagetools';
@@ -14,7 +13,7 @@ import qrMuseo from '@/assets/qrcodes/qrcode-museo.png?w=360&imagetools';
   <section class="h-full">
     <div class="grid grid-rows-[169px_1fr] h-full relative">
       <div class="flex w-full relative  justify-center">
-        <BackHomeButton />
+
         <img :src="museoLogo" alt="Museo di San Francesco di Paola"
           class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" draggable="false" />
       </div>

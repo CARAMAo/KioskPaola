@@ -5,6 +5,7 @@ import TopBar from '@/components/TopBar.vue';
 import EmergencyNumbers from '@/components/EmergencyNumbers.vue';
 import Sponsors from '@/components/Sponsors.vue';
 import FootBar from './components/FootBar.vue';
+import BackHomeButton from './components/BackHomeButton.vue';
 
 
 const router = useRouter();
@@ -93,8 +94,10 @@ onBeforeUnmount(() => {
 
 
   <div class="app-wrapper">
+    <BackHomeButton v-if="router.currentRoute.value.path !== '/'" class="top-40 left-5 z-10" />
     <TopBar />
     <main class="content">
+
       <router-view v-slot="{ Component, route }">
         <KeepAlive>
           <Transition name="fade">

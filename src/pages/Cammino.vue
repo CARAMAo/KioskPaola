@@ -13,23 +13,23 @@ import c7 from '@/assets/photos/cammino/7.jpg?w=1080&format=webp&imagetools';
 import c8 from '@/assets/photos/cammino/8.jpg?w=1080&format=webp&imagetools';
 import BannerCammino from '@/components/BannerCammino.vue';
 
+
 const images = [c1, c2, c3, c4, c5, c6, c7, c8];
 </script>
 
 <template>
-  <section class="h-full ">
 
-    <div class="grid grid-rows-[auto_auto_1fr] gap-[0.6rem] h-full relative">
+  <section class="h-full ">
+    <div class="grid grid-rows-[auto_1fr_155px] gap-[0.6rem] h-full relative">
       <div class="flex items-center relative h-full ">
-        <BackHomeButton />
         <BannerCammino />
       </div>
 
 
-      <div class="grid grid-cols-[1fr_2.5fr] gap-y-[2.99em] gap-3">
+      <div class="grid grid-cols-[1fr_2.5fr] grid-rows-[.5fr_.2fr] gap-y-[2.99em] gap-3">
         <aside class="grid  pt-1">
           <article>
-            <h2 class="totem-h2 leading-[17px] tracking-wide text-[17px]">{{ $t('cammino.associazioneHeading') }}</h2>
+            <h2 class="totem-h2 leading-[25px] tracking-wide text-[17px]">{{ $t('cammino.associazioneHeading') }}</h2>
             <p class="totem-p tracking-[0.08px] leading-[16.28px]">{{ $t('cammino.text1') }}</p>
           </article>
 
@@ -64,7 +64,7 @@ const images = [c1, c2, c3, c4, c5, c6, c7, c8];
       </div>
       <div
         class="border-solid border-t-[2px] border-t-blue-950 grid grid-cols-[22%_1fr]  pt-4 font-serif text-[40px] items-center">
-        <div class=" justify-self-end"><img :src="qrCode" width="130" draggable="false" /></div>
+        <div class=" justify-self-end"><img :src="qrCode" width="140" draggable="false" /></div>
         <div class="pl-11">www.ilcamminodisanfrancesco.it</div>
       </div>
     </div>

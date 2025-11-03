@@ -11,7 +11,7 @@ import qrCodeSantuario from '@/assets/qrcodes/qrcode-santuario.png?w=260&imageto
     <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-30 pointer-events-none select-none z-10" /> -->
     <div class="grid grid-rows-[160px_auto_155px] gap-3 h-full relative">
       <div class="flex items-center justify-center">
-        <BackHomeButton />
+
         <img :src="logo" alt="Basilica Santuario San Francesco di Paola" class="h-full object-contain"
           draggable="false" />
       </div>

@@ -19,7 +19,6 @@ const images = [b1, b2, b3, b4, b5, b6];
     <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
     <div class="grid grid-rows-[160px_625px_1fr] gap-[16px] h-full relative">
       <div class="flex items-center justify-center">
-        <BackHomeButton class="absolute top-5 left-5" />
         <img :src="logoBorgo" class="h-[110%]" draggable="false" />
       </div>
 

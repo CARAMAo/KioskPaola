@@ -84,7 +84,7 @@ function loadSponsorsImgs(){
       const data = fs.readFileSync(path.join(dir, f.name));
       sponsors.push(data.toString('base64'));
     }
-    console.log('[preload] Sponsors found:', Object.length(map));
+    console.log('[preload] Sponsors found:', Object.length(sponsors));
   } catch (e) {
     console.error('Error reading sponsors', e);
   }

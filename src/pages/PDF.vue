@@ -162,7 +162,6 @@ onBeforeUnmount(async () => {
 <template>
   <div class="w-full h-full flex flex-col">
     <div class="mb-2 w-full h-16 relative">
-      <BackHomeButton />
     </div>
     <template v-if="hasPdf">
       <div ref="containerRef" class="relative w-full flex-1 flex items-center justify-center bg-white">
