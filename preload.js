@@ -54,12 +54,47 @@ function loadBusPdfs() {
   return map;
 }
 
+function resolveLocalesDir() {
+  try {
+    const ext = path.join(path.dirname(process.execPath), 'locales');
+    if (fs.existsSync(ext)) return ext;
+  } catch (_) {}
+  try {
+    const dev = path.join(process.cwd(), 'locales');
+    if (fs.existsSync(dev)) return dev;
+  } catch (_) {}
+  try {
+    const res = path.join(process.resourcesPath || '', 'locales');
+    if (fs.existsSync(res)) return res;
+  } catch (_) {}
+  return null;
+}
+
 contextBridge.exposeInMainWorld('api', {
-  // Lettura congiunta dei locali da PWD/locales (it/en) in un'unica risposta
+  // Legge un singolo locale (yaml/json) dalla cartella esterna
+  readLocale: (lang) => {
+    try {
+      const base = resolveLocalesDir();
+      if (!base) return null;
+      const candidates = [
+        path.join(base, `${lang}.yaml`),
+        path.join(base, `${lang}.yml`),
+        path.join(base, `${lang}.json`),
+      ];
+      for (const p of candidates) {
+        if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+      }
+    } catch (e) {
+      console.error('readLocale error', e);
+    }
+    return null;
+  },
+  // Restituisce entrambi i locales (se presenti) in un'unica chiamata
   getAllLocales: () => {
     try {
-      const base = path.join(process.cwd(), 'locales');
+      const base = resolveLocalesDir();
       const out = {};
+      if (!base) return out;
       const readYaml = (p) => {
         try {
           if (fs.existsSync(p)) {
@@ -71,7 +106,6 @@ contextBridge.exposeInMainWorld('api', {
         }
         return undefined;
       };
-
       const it = readYaml(path.join(base, 'it.yaml'));
       if (it) out.it = it;
       const en = readYaml(path.join(base, 'en.yaml'));
@@ -82,28 +116,6 @@ contextBridge.exposeInMainWorld('api', {
       return {};
     }
   },
-  // Lettura file di localizzazione da filesystem vicino all'eseguibile
-  getLocales: () => {
-    try {
-      const candidates = [];
-
-      if (process.resourcesPath) {
-        candidates.push(path.join(process.resourcesPath, 'locales', `${lang}.yaml`));
-        candidates.push(path.join(process.resourcesPath, 'locales', `${lang}.yml`));
-      }
-
-      for (const p of candidates) {
-        if (fs.existsSync(p)) {
-          return fs.readFileSync(p, 'utf8');
-        }
-      }
-    } catch (e) {
-      console.error('readLocale error', e);
-    }
-    return null;
-  },
   // Ritorna un oggetto { <nomePdfSenzaEstensione>: <base64> }
-  getBusPdfs: () => {
-    return loadBusPdfs();
-  },
+  getBusPdfs: () => loadBusPdfs(),
 });
