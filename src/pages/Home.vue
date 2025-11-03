@@ -62,7 +62,7 @@ import BannerCammino from '@/components/BannerCammino.vue';
 }
 
 .map{
-    background: url('/TOTEM/MAppa\ Totem.jpg');
+    background: url('@/assets/maps/mappa-home.jpg');
     background-size: cover;
 }
 
