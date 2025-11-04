@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
       
 
       <TopBar />
-      <BackHomeButton v-if="!isHome" :class="`absolute top-[${router.currentRoute.value.path==='/santuario' ? '10.5' : '14.5'}%] left-5 z-10`"/>
+      <BackHomeButton v-if="!isHome" :class="['absolute left-5 z-10', router.currentRoute.value.path==='/santuario' ? 'top-[10.5%]' : 'top-[14.5%]']"/>
 
       <main
         class="relative  bg-linear-to-br "

@@ -1,18 +1,17 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import flagIt from '@/assets/logos/lang-it.png?w=144&imagetools';
 import flagEn from '@/assets/logos/lang-en.png?w=144&imagetools';
+import { useI18n } from 'vue-i18n';
+
+const i18n = useI18n();
 
 const LANG_STORAGE_KEY = 'active-language';
 
-const activeLang = ref('it');
+const activeLang = computed( () => i18n.locale.value)
 
-onMounted(() => {
-  const stored = localStorage.getItem(LANG_STORAGE_KEY);
-  if (stored === 'it' || stored === 'en') {
-    activeLang.value = stored;
-  }
-});
+
+
 
 watch(activeLang, (val) => {
   localStorage.setItem(LANG_STORAGE_KEY, val);
@@ -29,6 +28,7 @@ function setLang(lang) {
 
 <template>
      <div class="topbar__languages" aria-label="Selezione lingua">
+      
       <button
         class="topbar__language"
         type="button"
