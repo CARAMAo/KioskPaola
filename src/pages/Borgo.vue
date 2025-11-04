@@ -1,7 +1,6 @@
 <script setup>
-import BackHomeButton from '@/components/BackHomeButton.vue';
 import ImageCarousel from '@/components/ImageCarousel.vue';
-import logoBorgo from '@/assets/logos/logo-borgo.png?w=500&imagetools'
+import logoBorgo from '@/assets/logos/logo-borgo.png?w=500&imagetools';
 
 import b1 from '@/assets/photos/borgo/Borgo 1.JPG?w=1080&format=webp&imagetools';
 import b2 from '@/assets/photos/borgo/Borgo 2.JPG?w=1080&format=webp&imagetools';
@@ -15,35 +14,52 @@ const images = [b1, b2, b3, b4, b5, b6];
 </script>
 
 <template>
-  <section class="h-full">
-    <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
-    <div class="grid grid-rows-[160px_625px_1fr] gap-[16px] h-full relative">
-      <div class="flex items-center justify-center">
-        <img :src="logoBorgo" class="h-[110%]" draggable="false" />
-      </div>
+  <section class="grid h-full min-h-0 grid-rows-[auto_485px_1fr] p-6 gap-3 leading-none">
+    <div
+      class="relative flex my-0 items-center justify-center  rounded-[28px] bg-gradient-to-br from-white/98 via-white/92 to-white/75   ring-1 ring-white/50"
+    >
+     
+      <img
+        :src="logoBorgo"
+        class="relative w-96  object-contain drop-shadow-[0_20px_24px_rgba(1,1,1,0.28)]"
+        draggable="false"
+      />
+ 
+    </div>
 
-      <div class="border border-[#c9c9c9] -mt-[2px]">
-        <ImageCarousel :images="images" :autoplay="true" :showIndicators="false" :interval="5000" />
-      </div>
+    <div class="relative overflow-hidden rounded-[28px] bg-white/90 shadow-elevated ring-1 ring-white/45">
+      <ImageCarousel
+        :images="images"
+        :autoplay="true"
+        :showIndicators="false"
+        :interval="5000"
+        class="h-full w-full"
+      />
+      <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand/20 via-transparent to-transparent"></div>
+    </div>
 
-      <div class="grid grid-rows-[143px_1fr] gap-4 mt-[3px]">
-        <article class="pt-1">
-          <h2 class="text-accent font-[600] tracking-widest uppercase -mb-1">{{ $t('borgo.heading') }}</h2>
-          <p class="totem-p ">{{ $t('borgo.text1') }}</p>
+    <div class="grid grid-cols-[1fr_1fr] gap-3 min-h-0 overflow-auto">
+      <article class="space-y-2 col-span-2 rounded-[24px] bg-white/88 p-6 shadow-elevated ring-1 ring-white/45">
+        <div class="h-1 w-16 rounded-full bg-accent/70"></div>
+        <h2 class="font-grenze text-[28px] font-bold uppercase tracking-[0.05em] text-accent">
+          {{ $t('borgo.heading') }}
+        </h2>
+        <p class="whitespace-pre-line text-[22px] font-grenze leading-none tracking-[0.01em] text-text">
+          {{ $t('borgo.text1') }}
+        </p>
+
+        
+      </article>
+      <article class="space-y-2 columns-2 col-span-2 rounded-[24px] bg-white/88 p-6 shadow-elevated ring-1 ring-white/45">
+     
+      <div class="h-1 w-16 rounded-full bg-brand/60"></div>
+        <h2 class="font-grenze text-[28px] font-bold uppercase tracking-[0.05em] text-accent">
+          {{ $t('borgo.historyHeading') }}
+        </h2>
+        <p class="whitespace-pre-line text-[22px] font-grenze leading-none tracking-[0.01em] text-text">
+          {{ $t('borgo.text2') }}
+        </p>
         </article>
-        <article class="leading-[24px]">
-          <h2 class="text-accent font-[600] tracking-wide uppercase">{{ $t('borgo.historyHeading') }}</h2>
-          <p class="totem-p leading-[16px]">{{ $t('borgo.text2') }}</p>
-        </article>
-      </div>
     </div>
   </section>
 </template>
-
-<style lang="css">
-/* rimuovi qualsiasi raggio nel carosello */
-.carousel,
-.carousel img {
-  border-radius: 0 !important;
-}
-</style>

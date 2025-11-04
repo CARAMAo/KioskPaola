@@ -4,13 +4,13 @@ import LanguageSwitcher from './LanguageSwitcher.vue';
 </script>
 
 <template>
-  <header class="topbar">
+  <header class="topbar z-10 shadow-black/60 shadow-[0px_8px_16px]">
     <div class="topbar__brand">
       <img :src="cityCoat" alt="Stemma della Città di Paola" class="topbar__brand-image" />
     </div>
 
-    <div class="topbar__title">
-      <span>CITTÀ DI PAOLA</span>
+    <div class="topbar__title font-semibold font-grenze">
+      <span>Città di Paola</span>
     </div>
 
     <LanguageSwitcher/>
@@ -26,15 +26,18 @@ import LanguageSwitcher from './LanguageSwitcher.vue';
 
   color: var(--color-primary-contrast);
   display: grid;
-  grid-template-columns: 140px 1fr 180px;
+  grid-template-columns: 140px 1fr 140px;
+  place-items: center;
   height: 100%;
-  padding-left: 32px;
-  padding-right: 8px;
+  
 }
 
 .topbar__brand {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  height:100%;
+  gap: 10px;
 }
 
 .topbar__brand-image {
@@ -43,12 +46,11 @@ import LanguageSwitcher from './LanguageSwitcher.vue';
 }
 
 .topbar__title {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 60px;
-  letter-spacing: 2px;
+  font-size: 68px;
+  letter-spacing: 4px;
   padding-left: 23px;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 
 </style>

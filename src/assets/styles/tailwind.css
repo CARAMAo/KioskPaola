@@ -1,23 +1,82 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Tailwind v4 tokens: usable as bg-primary, text-accent, etc. */
+@theme {
+  /* Core brand palette */
+  --color-primary: #1a2749; /* brand */
+  --color-accent: #c89213;
+  --color-muted: rgb(27 37 63 / 72%);
+
+  /* Keep existing names working alongside config usage */
+  --color-brand: var(--color-primary);
+  --color-text: #0f1b33;
+  --color-text-muted: var(--color-muted);
+
+  /* Optional: surfaces and borders for convenience */
+  --color-background: #edf1fb;
+  --color-surface: rgb(255 255 255 / 94%);
+  --color-surface-subtle: rgb(255 255 255 / 68%);
+  --color-border: rgb(26 39 73 / 14%);
+
+  /* Radii */
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Shadows */
+  --shadow-elevated: 0 26px 48px -28px rgb(9 15 31 / 0.65);
+  --shadow-glow: 0 0 0 1px rgb(255 255 255 / 0.12), 0 20px 36px -20px rgb(13 31 68 / 0.45);
+
+  /* Fonts */
+  --font-sans: Segoe UI, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-grenze: Grenze, Georgia, "Times New Roman", serif;
+}
 
 /* Opzionale: sposta qui le CSS variables, oppure lascia quelle già in src/App.vue */
 @layer base {
   :root {
-    --color-background: #f3f6ff;
-    --color-surface: #ffffff;
-    --color-surface-subtle: #e8ecf6;
-    --color-primary: rgb(29,43,78);
-    --color-primary-contrast: #f3f6ff;
-    --color-accent: rgb(200,146,19);
-    --color-text: #000;
-    --color-text-muted: rgba(84, 86, 114, 0.895);
+    --color-background: #edf1fb;
+    --color-background-rgb: 237 241 251;
+    --color-surface: rgba(255, 255, 255, 0.94);
+    --color-surface-rgb: 255 255 255;
+    --color-surface-subtle: rgba(255, 255, 255, 0.68);
+    --color-surface-subtle-rgb: 255 255 255;
+    --color-primary: #1a2749;
+    --color-primary-rgb: 26 39 73;
+    --color-primary-contrast: #f7f9ff;
+    --color-primary-contrast-rgb: 247 249 255;
+    --color-accent: #c89213;
+    --color-accent-rgb: 200 146 19;
+    --color-text: #0f1b33;
+    --color-text-rgb: 15 27 51;
+    --color-text-muted: rgba(27, 37, 63, 0.72);
+    --color-text-muted-rgb: 27 37 63;
+    --color-border-soft: rgba(26, 39, 73, 0.14);
+    --color-border-soft-rgb: 26 39 73;
+    --blur-strong: 26px;
     user-select: none;
   }
 }
 
 @layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply min-h-screen bg-cover bg-center bg-fixed antialiased font-sans flex items-center justify-center overflow-hidden;
+    color: rgb(var(--color-text-rgb));
+  }
+
+  #app {
+    @apply flex h-screen w-full items-center justify-center overflow-hidden;
+  }
+
+  img {
+    @apply select-none;
+  }
+
   /* Grenze static weights (TTF) */
   @font-face {
     font-family: 'Grenze';
@@ -147,11 +206,25 @@
   }
 }
 
-@layer components {
-.totem-h2 {
-@apply text-accent font-[600] tracking-wide uppercase;
-}
-.totem-p {
-@apply text-text text-[13.5px] hyphens-auto whitespace-pre-line leading-[16.5px] tracking-[-0.07px];
-}
+/* Custom mask utilities (Tailwind v4-friendly) */
+@layer utilities {
+  /* Use the black PNG as a mask to color with bg-*/
+  .mask-santuario {
+    -webkit-mask-image: url('@/assets/imgs/santuario-sketch.png');
+    mask-image: url('@/assets/imgs/santuario-sketch.png');
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  /* Circular mask; change size via [--mask-size:80%] */
+  .mask-radial {
+    -webkit-mask: radial-gradient(closest-side, #000 99%, transparent 100%) center/
+      var(--mask-size, 100%) var(--mask-size, 100%) no-repeat;
+    mask: radial-gradient(closest-side, #000 99%, transparent 100%) center/
+      var(--mask-size, 100%) var(--mask-size, 100%) no-repeat;
+  }
 }

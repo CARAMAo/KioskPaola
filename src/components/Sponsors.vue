@@ -62,13 +62,12 @@ onUnmounted(() => {
 
   flex: 1;
   height: 100%;
-  background: rgb(240, 237, 240, .3);
-  border: 2px solid lightgrey;
+  background: transparent;
+
   border-radius: 4px;
   padding: 16px;
 }
 
-/* Fixed slots to avoid reflow during swaps */
 .slot {
   position: relative;
   flex: 1 1 0;

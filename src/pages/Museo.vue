@@ -5,52 +5,104 @@ import img3 from '@/assets/photos/museo/Museo 3.jpeg?w=1200&format=webp&imagetoo
 import img4 from '@/assets/photos/museo/Museo 4.jpg?w=1000&format=webp&imagetools';
 import museoLogo from '@/assets/logos/logo-museo-alt.png?w=400&imagetools';
 import qrMuseo from '@/assets/qrcodes/qrcode-museo.png?w=360&imagetools';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from "vue-i18n";
+const { t } = useI18n({ useScope: "global" });
+
+
+const text1 = computed(() => {
+  return t('museo.text').split('\n\n').slice(4).join('\n\n')
+})
 
 </script>
 
 <template>
-  <!-- <img :src="bozza" alt="" class="absolute top-0 left-0 w-[1080px] h-[1920px] opacity-20 pointer-events-none select-none z-10" /> -->
-  <section class="h-full">
-    <div class="grid grid-rows-[169px_1fr] h-full relative">
-      <div class="flex w-full relative  justify-center">
+  
+  <section class="grid h-full grid-rows-[180px_1fr] gap-6 leading-[1]">
+    
+    <div
+      class="flex items-center justify-center rounded-[28px] bg-white/85 px-8 py-6 shadow-elevated ring-1 ring-white/45"
+    >
+    
+      <img
+        :src="museoLogo"
+        alt="Museo di San Francesco di Paola"
+        class="h-full w-[360px] object-contain drop-shadow-[0_18px_32px_rgba(0,0,0,0.25)]"
+        draggable="false"
+      />
+    </div>
 
-        <img :src="museoLogo" alt="Museo di San Francesco di Paola"
-          class="w-[400px] h-[100%] relative bottom-[0.3rem] left-0" draggable="false" />
+    <div class="grid h-full min-h-0 grid-cols-[540px_1fr] gap-6">
+      <div class="flex flex-col gap-6 rounded-[28px] bg-white/85 p-6 shadow-elevated ring-1 ring-white/45">
+        <p class="text-[25px] whitespace-pre-line font-grenze leading-[1] tracking-[0.01em] text-text">
+          {{ $t('museo.text').split('\n\n').slice(0,4).join('\n\n') }}
+        </p>
+
+        <div class="grid grid-cols-[48%_1fr] h-full gap-2">
+          <div class="grid grid-rows-[3fr_2fr] gap-2">
+            <div class="overflow-hidden rounded-[24px] bg-white/90 shadow-elevated ring-1 ring-white/40">
+              <img
+                :src="img2"
+                alt="Museo dettaglio 2"
+                class="h-full w-full object-cover object-center"
+                draggable="false"
+              />
+            </div>
+            <div class="overflow-hidden rounded-[24px] bg-white/90 shadow-elevated ring-1 ring-white/40">
+              <img
+                :src="img4"
+                alt="Museo dettaglio 4"
+                class="h-full w-full object-cover object-center"
+                draggable="false"
+              />
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-[24px] bg-white/90 shadow-elevated ring-1 ring-white/40">
+            <img
+              :src="img3"
+              alt="Museo dettaglio 3"
+              class="h-full w-full object-cover object-center"
+              draggable="false"
+            />
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-[362px_1fr]  gap-3 mt-[5px] h-full min-h-0">
-        <div class="grid grid-rows-[auto_1fr]">
-          <p class="totem-p -mt-1 leading-[16.2px]">{{ $t('museo.text') }}</p>
-
-          <div class="flex flex-col  mb-14 items-center gap-12 self-end">
-            <div class="text-text text-[16px] uppercase">{{ $t('common.moreInfoSite') }}</div>
-            <img :src="qrMuseo" alt="QR Museo" class="w-[180px] h-[180px] object-contain" draggable="false" />
-          </div>
+      <div class="flex h-full min-h-0 flex-col gap-2">
+        <div class="relative h-[660px] overflow-hidden rounded-[28px] bg-white/90 shadow-elevated ring-1 ring-white/45">
+          <img
+            :src="hero1"
+            alt="Museo - esposizione"
+            class="h-full w-full object-cover object-center"
+            draggable="false"
+          />
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand/18 via-transparent to-transparent"></div>
         </div>
 
-        <div class="grid grid-rows-[520px_625px] gap-3 h-full min-h-0">
-          <div class="overflow-hidden min-h-0">
-            <img :src="hero1" alt="Museo - esposizione" class="w-full h-full object-cover object-center"
-              draggable="false" />
-          </div>
-          <div class="grid grid-cols-[38.8%_1fr] gap-3 h-full min-h-0">
-            <div class="grid grid-rows-[3.6fr_2fr] gap-3 h-full min-h-0">
-              <div class="overflow-hidden min-h-0">
-                <img :src="img2" alt="Museo dettaglio 2" class="w-full h-full object-cover object-center"
-                  draggable="false" />
-              </div>
-              <div class="overflow-hidden min-h-0">
-                <img :src="img4" alt="Museo dettaglio 4" class="w-full h-full object-cover object-center"
-                  draggable="false" />
-              </div>
-            </div>
+        <article class="space-y-3 h-[670px] rounded-[28px] bg-white/85 p-5 shadow-elevated ring-1 ring-white/45">
+          <p class="text-[23px] whitespace-pre-line font-grenze leading-[1] tracking-[0.01em] text-text">
+            {{ text1 }}
+          </p>
+        </article>
 
-            <div class="overflow-hidden min-h-0">
-              <img :src="img3" alt="Museo dettaglio 3" class="w-full h-full object-cover object-center"
-                draggable="false" />
-            </div>
+        <article
+          class="flex justify-self-end items-center justify-between gap-6 rounded-[28px] bg-white/85 p-6 shadow-elevated ring-1 ring-white/45"
+        >
+          <div class="space-y-2">
+            <h3 class="font-grenze text-[24px] font-bold uppercase tracking-[0.18em] text-brand">
+              {{ $t('common.moreInfoSite') }}
+            </h3>
+            <p class="text-[18px] font-grenze tracking-[0.06em] text-text">
+              Scopri il percorso museale completo scansionando il QR code.
+            </p>
           </div>
-        </div>
+          <img
+            :src="qrMuseo"
+            alt="QR Museo"
+            class="h-[180px] w-[180px] flex-shrink-0 object-contain drop-shadow-md"
+            draggable="false"
+          />
+        </article>
       </div>
     </div>
   </section>
