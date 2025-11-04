@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kiosk-windows
-          path: dist_electron/**
+          path: release/**
           if-no-files-found: error
           retention-days: 14
 
@@ -59,7 +59,7 @@ jobs:
           replacesArtifacts: true
           draft: false
           prerelease: false
-          artifacts: dist_electron/kiosk.exe
+          artifacts: release/kiosk.exe
           artifactContentType: application/vnd.microsoft.portable-executable
           body: |
             Windows portable build for v${{ github.ref_name }}.
