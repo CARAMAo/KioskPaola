@@ -168,19 +168,19 @@ onBeforeUnmount(async () => {
         <canvas ref="canvasRef"></canvas>
 
       </div>
-      <div class="flex flex-col flex-wrap justify-center items-center gap-2 -mt-10 z-10">
-        <div class="flex gap-3 items-center" v-if="numPages != 1">
+      <div class="relative bottom-16 flex flex-col flex-wrap justify-center items-center gap-6 z-10">
+        <div class="flex gap-4 items-center" v-if="numPages != 1">
           <button @click="prevPage" :disabled="pageNum <= 1"
-            class="  bg-brand text-white px-3 py-2 rounded disabled:opacity-20">←</button>
-          <span class="text-2xl">{{ pageNum }}/{{ numPages }}</span>
+            class=" w-16 h-16 bg-brand text-white text-3xl  px-3 py-2 rounded disabled:opacity-20">←</button>
+          <span class="text-3xl text-brand">{{ pageNum }}/{{ numPages }}</span>
           <button @click="nextPage" :disabled="pageNum >= numPages"
-            class=" bg-brand text-white px-3 py-2 rounded disabled:opacity-20">→</button>
+            class="w-16 h-16 bg-brand text-white text-3xl px-3 py-2 rounded disabled:opacity-20">→</button>
         </div>
         <div class="pb-1 flex flex-wrap gap-2 justify-center">
 
           <button v-for="name in available" :key="name" @click="selectPdf(name)"
-            class="px-3 py-1 rounded border text-xl"
-            :class="name === filename ? 'bg-brand text-white border-black' : 'bg-white/20 border-gray-400'">{{ name
+            class="px-3  h-16 py-1 rounded border text-2xl"
+            :class="name === filename ? 'bg-brand text-white border-black' : 'bg-white/20 text-brand border-gray-400'">{{ name
             }}</button>
         </div>
       </div>

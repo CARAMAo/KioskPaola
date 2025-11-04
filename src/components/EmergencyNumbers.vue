@@ -19,8 +19,8 @@ const contacts = [
         :key="i"
         class="group relative h-8 w-full flex flex-col gap-0 rounded-[14px] text-[16px] text-nowrap leading-0 px-0"
       >
-        <span class="text-brand text-3xl track z-0 font-semibold tabular-nums ring-1 bg-slate-50 ring-brand/60 rounded-2xl px-2">{{ c.number }}</span>
-        <span class="text-text-muted relative z-10 text-[22px] self-center top-2 px-1 font-bold  border-brand/60">{{ c.label }}</span>
+        <span class="text-brand text-3xl track z-0 font-semibold tabular-nums ring-1 bg-slate-50 ring-brand/60 rounded-2xl text-center">{{ c.number }}</span>
+        <span class="text-text-muted relative z-10 text-[22px] self-center top-4 px-1 font-bold  border-brand/60">{{ c.label }}</span>
       </div>
     </div>
   </div>
