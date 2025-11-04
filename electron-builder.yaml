@@ -5,7 +5,7 @@ asar: true
 forceCodeSigning: false
 
 directories:
-  output: dist_electron
+  output: release
 
 files:
   - dist/**
