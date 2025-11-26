@@ -3,11 +3,12 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 
 const sponsors = ref([]);
-const activeSponsors = ref([]);
+const activeSponsor = ref(0);
+
+
 
 let intervalId = null;
-let rotateIndex = 0;
-const ROTATE_MS = 2500; // rotation interval
+const ROTATE_MS = 7500; // rotation interval
 
 onMounted(() => {
   if (window.api?.getSponsors) {
@@ -15,25 +16,15 @@ onMounted(() => {
       const list = window.api.getSponsors() || [];
       sponsors.value = list.map((src, idx) => ({ id: idx, src }));
 
-      activeSponsors.value = sponsors.value.slice(0, Math.min(4, sponsors.value.length));
-
-      if (sponsors.value.length > activeSponsors.value.length) {
+      if (sponsors.value.length > 1) {
         intervalId = setInterval(() => {
-          const activeIds = new Set(activeSponsors.value.map(s => s.id));
-          const available = sponsors.value.filter(s => !activeIds.has(s.id));
-          if (available.length === 0) return;
-
-          const outIdx = Math.floor(Math.random() * activeSponsors.value.length);
-
-          const incoming = available[Math.floor(Math.random() * available.length)];
-
-          activeSponsors.value.splice(outIdx, 1, incoming);
+          activeSponsor.value = (activeSponsor.value + 1) % sponsors.value.length;
         }, ROTATE_MS);
       }
     } catch (e) {
       console.error('getSponsors failed', e);
       sponsors.value = [];
-      activeSponsors.value = [];
+      activeSponsors.value = 0;
     }
   }
 });
@@ -45,9 +36,10 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="sponsorsRow overflow-hidden ">
-    <div class="slot" v-for="(sponsor, i) in activeSponsors" :key="'slot-' + i">
+    <div class="slot">
       <Transition name="swap" mode="out-in">
-        <img v-if="sponsor" :key="sponsor.id" draggable="false" :src="'data:image/png;base64,' + sponsor.src" />
+        <img v-if="sponsors[activeSponsor]" :key="sponsors[activeSponsor].id" draggable="false"
+          :src="'data:image/png;base64,' + sponsors[activeSponsor].src" />
         <div v-else :key="'placeholder-' + i" class="placeholder"></div>
       </Transition>
     </div>
@@ -100,21 +92,21 @@ onUnmounted(() => {
 
 .swap-enter-from {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateX(10px);
 }
 
 .swap-enter-to {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .swap-leave-from {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .swap-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateX(-10px);
 }
 </style>
