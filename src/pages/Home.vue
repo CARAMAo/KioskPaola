@@ -11,12 +11,21 @@ import mapBorgo from '@/assets/maps/mappa-borgo.jpg?w=800&format=webp&imagetools
 import qrCammino from '@/assets/qrcodes/qrcode-cammino.png?w=300&imagetools';
 import santuarioSketch from '@/assets/imgs/santuario-sketch.png?w=800&imagetools';
 import iconBus from '@/assets/logos/icon-bus.png?w=400&imagetools';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
-const totem_id = import.meta.env.VITE_TOTEM_ID || 'PIAZZA';
+const totemId = ref('PIAZZA'); // Valore predefinito
+
+onMounted(() => {
+    if (window.api?.getTotemId) {
+        const id = window.api.getTotemId(); // Chiamata sincrona all'API del preload
+        if (id) {
+            totemId.value = id.toUpperCase();
+        }
+    }
+});
 
 const mappa = computed(() => {
-    return totem_id === 'MARINA' ? mapMarina : mapPiazza;
+    return totemId.value === 'MARINA' ? mapMarina : mapPiazza;
 });
 
 </script>

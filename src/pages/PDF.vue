@@ -180,7 +180,8 @@ onBeforeUnmount(async () => {
 
           <button v-for="name in available" :key="name" @click="selectPdf(name)"
             class="px-3  h-16 py-1 rounded border text-2xl"
-            :class="name === filename ? 'bg-brand text-white border-black' : 'bg-white/20 text-brand border-gray-400'">{{ name
+            :class="name === filename ? 'bg-brand text-white border-black' : 'bg-white/20 text-brand border-gray-400'">{{
+              name
             }}</button>
         </div>
       </div>

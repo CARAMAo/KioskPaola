@@ -40,9 +40,9 @@ try {
   try {
 
     const api = typeof window !== 'undefined' && window.api;
-    if (api && typeof api.getAllLocales === 'function') {
+    if (api && typeof api.getAllTranslations === 'function') {
         
-      const all = api.getAllLocales();
+      const all = api.getAllTranslations();
 
       installAllLocales(all);
       // imposta lingua iniziale se disponibile, altrimenti prima disponibile

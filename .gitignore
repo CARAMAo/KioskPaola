@@ -1,7 +1,7 @@
 dist
 node_modules
 orari-bus
-locales
+translations
 TOTEM
 dist_electron
 sponsors

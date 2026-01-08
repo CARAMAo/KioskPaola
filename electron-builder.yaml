@@ -6,6 +6,7 @@ forceCodeSigning: false
 
 directories:
   output: release
+  # buildResources: build
 
 files:
   - dist/**
@@ -13,24 +14,35 @@ files:
   - preload.js
   - package.json
 
-# Copia i file di localizzazione fuori dall'asar in resources/locales
-extraResources:
-  - from: src/locales
-    to: locales
-    filter:
-      - it.yaml
-      - en.yaml
-  - from: src/bus-pdfs
-    to: bus-pdfs
-    filter:
-      - "*.pdf"
+# Copia i file di localizzazione fuori dall'asar in resources/translations
+# extraResources:
+#   - from: src/locales
+#     to: translations
+#     filter:
+#       - "*.yaml"
+
+#   - from: src/bus-pdfs
+#     to: bus-pdfs
+#     filter:
+#       - "*.pdf"
+
+#   - from: src/sponsors
+#     to: sponsors
 
 win:
   target:
-    - portable
-  artifactName: kiosk.exe
+    - nsis
+  artifactName: Setup-${productName}-${version}.${ext}
   signAndEditExecutable: false
 
+# Configurazione per l'installer NSIS
+nsis:
+  oneClick: false # Mostra la procedura guidata di installazione
+  allowToChangeInstallationDirectory: true
+  perMachine: true # installa per tutti gli utenti
+  include: build/installer.nsh
+  runAfterFinish: false
+  warningsAsErrors: false
 # Disabilita publish automatico
 publish:
   provider: generic

@@ -7,7 +7,7 @@
     "dev": "vite",
     "start": "electron .",
     "build": "vite build",
-    "dist:win": "npm run build && electron-builder --config electron-builder.yaml --win portable"
+    "dist:win": "npm run build && electron-builder --win"
   },
   "keywords": [],
   "author": "",

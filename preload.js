@@ -3,138 +3,125 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 
-function resolveBusDir() {
+// --- Helper Percorsi ---
+// Deve corrispondere alla logica del Main e dell'Installer
+function resolveBaseDir() {
   try {
-    // In produzione: cartella accanto all'eseguibile (gestisce anche "portable")
-    const prodBase = process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
-    const prodDir = path.join(prodBase, 'orari-bus');
-    if (fs.existsSync(prodDir)) return prodDir;
-  } catch (_) {}
+    if (process.env.PORTABLE_EXECUTABLE_DIR) return process.env.PORTABLE_EXECUTABLE_DIR;
+    // __dirname in produzione è dentro app.asar, quindi usiamo process.execPath per uscire
+    const isPackaged = !process.execPath.includes('node_modules') && !process.execPath.includes('electron.exe'); 
+    if (isPackaged) {
+        return path.dirname(process.execPath);
+    }
+    return process.cwd();
+  } catch (_) {
+    return process.cwd();
+  }
+}
+
+const BASE_DIR = resolveBaseDir();
+
+// --- Funzioni di Lettura (SOLA LETTURA) ---
+
+function readTotemId() {
+  const p = path.join(BASE_DIR, 'kiosk.conf');
+  try {
+    if (!fs.existsSync(p)) return null;
+    const raw = fs.readFileSync(p, 'utf8');
+    // Parsing manuale semplice
+    const lines = raw.split(/\r?\n/);
+    for (const line of lines) {
+        const parts = line.split('=');
+        if (parts.length === 2 && parts[0].trim() === 'totem_id') {
+            return parts[1].trim();
+        }
+    }
+  } catch (e) {
+    console.error('[preload] Error reading totem_id', e);
+  }
+  return null;
+}
+
+function loadSponsorsImgs() {
+  const dir = path.join(BASE_DIR, 'sponsors');
+  const sponsors = [];
   
-  try {
-    // In sviluppo: root del progetto (cwd)
-    const devDir = path.join(process.cwd(), 'orari-bus');
-    if (fs.existsSync(devDir)) return devDir;
-  } catch (_) {}
-
-  try {
-    // In sviluppo: vicino a questo file preload.js
-    const hereDir = path.join(__dirname, 'orari-bus');
-    if (fs.existsSync(hereDir)) return hereDir;
-  } catch (_) {}
-
-  return null;
-}
-function loadBusPdfs() {
-  const dir = resolveBusDir();
-  if (!dir) {
-    console.warn('[preload] orari-bus directory not found');
-  } else {
-    console.log('[preload] Using orari-bus dir:', dir);
+  if (!fs.existsSync(dir)) {
+      console.warn('[preload] Sponsors dir missing:', dir);
+      return sponsors;
   }
-  const map = {};
-  if (!dir) return map;
+
   try {
     const files = fs.readdirSync(dir, { withFileTypes: true });
     for (const f of files) {
       if (!f.isFile()) continue;
       const ext = path.extname(f.name).toLowerCase();
-      if (ext !== '.pdf') continue;
-      const name = path.basename(f.name, ext);
-      
-      const data = fs.readFileSync(path.join(dir, f.name));
-      map[name] = data.toString('base64');
+      if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+        const data = fs.readFileSync(path.join(dir, f.name));
+        sponsors.push(data.toString('base64'));
+      }
     }
-    console.log('[preload] PDFs found:', Object.keys(map));
   } catch (e) {
-    console.error('Error reading orari-bus PDFs', e);
-  }
-  return map;
-}
-
-function resolveSponsorsDir(){
-  try {
-    const port = process.env.PORTABLE_EXECUTABLE_DIR && path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'sponsors');
-    if (port && fs.existsSync(port)) return port;
-  } catch (_) {}
-  try {
-    const dev = path.join(process.cwd(), 'sponsors');
-    if (fs.existsSync(dev)) return dev;
-  } catch (_) {}
-
-  return null;
-}
-
-function loadSponsorsImgs(){
-    const dir = resolveSponsorsDir();
-  if (!dir) {
-    console.warn('[preload] sponsors directory not found');
-  } else {
-    console.log('[preload] Using sponsors dir:', dir);
-  }
-  const sponsors = []
-  if (!dir) return sponsors;
-  try {
-    const files = fs.readdirSync(dir, { withFileTypes: true });
-    for (const f of files) {
-      if (!f.isFile()) continue;
-      const ext = path.extname(f.name).toLowerCase();
-      if (ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') continue;
-      
-      const data = fs.readFileSync(path.join(dir, f.name));
-      sponsors.push(data.toString('base64'));
-    }
-    console.log('[preload] Sponsors found:', Object.length(sponsors));
-  } catch (e) {
-    console.error('Error reading sponsors', e);
+    console.error('[preload] Error loading sponsors', e);
   }
   return sponsors;
 }
 
+function loadBusPdfs() {
+  const dir = path.join(BASE_DIR, 'orari-bus');
+  const map = {};
 
-function resolveLocalesDir() {
+  if (!fs.existsSync(dir)) {
+      console.warn('[preload] Bus dir missing:', dir);
+      return map;
+  }
 
   try {
-    const port = process.env.PORTABLE_EXECUTABLE_DIR && path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'locales');
-    if (port && fs.existsSync(port)) return port;
-  } catch (_) {}
-  try {
-    const dev = path.join(process.cwd(), 'locales');
-    if (fs.existsSync(dev)) return dev;
-  } catch (_) {}
-
-  return null;
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    for (const f of files) {
+      if (!f.isFile()) continue;
+      if (path.extname(f.name).toLowerCase() !== '.pdf') continue;
+      
+      const name = path.basename(f.name, '.pdf'); // Nome senza estensione
+      const data = fs.readFileSync(path.join(dir, f.name));
+      map[name] = data.toString('base64');
+    }
+  } catch (e) {
+    console.error('[preload] Error loading PDFs', e);
+  }
+  return map;
 }
 
-contextBridge.exposeInMainWorld('api', {
-  getSponsors: () => loadSponsorsImgs(),
-  // Restituisce entrambi i locales (se presenti) in un'unica chiamata
-  getAllLocales: () => {
+function loadTranslations() {
+  // usiamo la cartella "translations" creata dall'installer
+  const dir = path.join(BASE_DIR, 'translations');
+  const out = {};
+
+  const readYaml = (filename) => {
     try {
-      const base = resolveLocalesDir();
-      const out = {};
-      if (!base) return out;
-      const readYaml = (p) => {
-        try {
-          if (fs.existsSync(p)) {
-            const raw = fs.readFileSync(p, 'utf8');
-            return yaml.load(raw) || {};
-          }
-        } catch (e) {
-          console.error('[preload] getAllLocales parse error for', p, e);
-        }
-        return undefined;
-      };
-      const it = readYaml(path.join(base, 'it.yaml'));
-      if (it) out.it = it;
-      const en = readYaml(path.join(base, 'en.yaml'));
-      if (en) out.en = en;
-      return out;
+      const p = path.join(dir, filename);
+      if (fs.existsSync(p)) {
+        return yaml.load(fs.readFileSync(p, 'utf8')) || {};
+      }
     } catch (e) {
-      console.error('[preload] getAllLocales error', e);
-      return {};
+      console.error(`[preload] Error reading ${filename}`, e);
     }
-  },
-  // Ritorna un oggetto { <nomePdfSenzaEstensione>: <base64> }
+    return undefined;
+  };
+
+  const it = readYaml('it.yaml');
+  if (it) out.it = it;
+  
+  const en = readYaml('en.yaml');
+  if (en) out.en = en;
+
+  return out;
+}
+
+// --- API Esposta ---
+contextBridge.exposeInMainWorld('api', {
+  getTotemId: () => readTotemId(),
+  getSponsors: () => loadSponsorsImgs(),
+  getAllTranslations: () => loadTranslations(),
   getBusPdfs: () => loadBusPdfs(),
 });
