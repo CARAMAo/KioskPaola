@@ -1,14 +1,20 @@
 !include "nsDialogs.nsh"
 !include "LogicLib.nsh"
-
+!include "FileFunc.nsh" 
+!include "TextFunc.nsh"
 ; --- VARIABILI GLOBALI ---
 Var Dialog
 Var Label
 Var RadioPiazza
 Var RadioMarina
 Var TotemChoice
-Var UserText
-Var UserNameEntered
+
+; Variabili per la selezione utente
+Var UserDropList ; Il controllo UI (combobox)
+Var UserNameSelected ; Il valore scelto (es. "Kiosk")
+Var HLine ; Handle per lettura file
+
+RequestExecutionLevel admin
 
 ; =========================================================
 ; PAGINA 1: SCELTA TOTEM
@@ -41,64 +47,109 @@ Function fnc_TotemPage_Leave
 FunctionEnd
 
 ; =========================================================
-; PAGINA 2: CREAZIONE UTENTE KIOSK
+; PAGINA 2: SELEZIONE UTENTE ESISTENTE
 ; =========================================================
-Page custom fnc_UserPage_Show fnc_UserPage_Leave
+Page custom fnc_UserSelect_Show fnc_UserSelect_Leave
 
-Function fnc_UserPage_Show
+; Definizioni API Windows
+; Definizioni API Windows (se non le hai già in cima al file)
+!define FILTER_NORMAL_ACCOUNT 0x0002
+!define NERR_Success 0
+
+Function fnc_UserSelect_Show
     nsDialogs::Create 1018
     Pop $Dialog
     ${If} $Dialog == error
         Abort
     ${EndIf}
-    ${NSD_CreateLabel} 0 0 100% 25u "Inserisci il nome dell'Utente Windows limitato da creare.$\r$\n(Solo lettere, niente spazi, non deve esistere)."
+
+    ${NSD_CreateLabel} 0 0 100% 25u "Seleziona l'account locale che diventerà il Kiosk User.$\r$\n(Questo utente verrà impostato per il login automatico e l'avvio diretto dell'app)."
     Pop $Label
-    ${NSD_CreateText} 0 30u 100% 12u "Kiosk"
-    Pop $UserText
+
+    ; Creiamo il menu a tendina
+    ${NSD_CreateDropList} 0 35u 100% 80u ""
+    Pop $UserDropList
+
+    ; --- 1. IDENTIFICA L'AMMINISTRATORE CORRENTE ---
+    ; Leggiamo il nome dell'utente che sta eseguendo l'installer per escluderlo dalla lista.
+    ; Usiamo il registro $8 per memorizzarlo.
+    ReadEnvStr $8 "USERNAME"
+
+    ; --- 2. ENUMERAZIONE UTENTI (API NetUserEnum) ---
+    ; r0 = Buffer, r1 = EntriesRead, r2 = Total, r3 = Resume, r4 = Status
+    System::Call 'netapi32::NetUserEnum(n, i 0, i ${FILTER_NORMAL_ACCOUNT}, *i .r0, i -1, *i .r1, *i .r2, *i .r3) i .r4'
+
+    ${If} $4 == ${NERR_Success}
+        StrCpy $5 0  ; Contatore ciclo
+        StrCpy $6 $0 ; Puntatore buffer corrente
+
+        LoopUsers:
+            IntCmp $5 $1 DoneUsers ; Se abbiamo letto tutti gli utenti, fine
+
+            ; Leggi il nome utente corrente dal puntatore in memoria -> $7
+            System::Call "*$6(w .r7)"
+
+            ; --- FILTRI DI SICUREZZA ---
+            ; Salta utenti di sistema
+            StrCmp $7 "Administrator" SkipUser
+            StrCmp $7 "Guest" SkipUser
+            StrCmp $7 "DefaultAccount" SkipUser
+            StrCmp $7 "WDAGUtilityAccount" SkipUser
+            
+            ; --- FILTRO ANTI-LOCKOUT ---
+            ; Se l'utente trovato ($7) è uguale all'utente corrente ($8), SALTALO.
+            ; Questo impedisce all'admin di selezionare se stesso.
+            StrCmp $7 $8 SkipUser
+
+            ; Se passa i filtri, aggiungilo alla lista
+            ${NSD_CB_AddString} $UserDropList $7
+
+            SkipUser:
+            ; Avanza di 4 byte (dimensione puntatore su 32bit) o struct size
+            IntOp $6 $6 + 4 
+            IntOp $5 $5 + 1
+            Goto LoopUsers
+
+        DoneUsers:
+        ; Pulisci la memoria
+        System::Call 'netapi32::NetApiBufferFree(i r0)'
+    ${Else}
+        MessageBox MB_ICONSTOP "Errore nell'enumerazione degli utenti (Codice: $4).$\r$\nImpossibile popolare la lista."
+    ${EndIf}
+
+    ; Seleziona il primo elemento se disponibile
+    ${NSD_CB_SelectString} $UserDropList 0
+
     nsDialogs::Show
 FunctionEnd
 
-Function fnc_UserPage_Leave
-    ; 1. Input
-    ${NSD_GetText} $UserText $UserNameEntered
-    
-    ; 2. Controllo Vuoto
-    StrLen $0 $UserNameEntered
-    ${If} $0 == 0
-        MessageBox MB_ICONSTOP "Il nome utente non può essere vuoto."
+
+Function fnc_UserSelect_Leave
+
+    SendMessage $UserDropList 0x0147 0 0 $0 ; CB_GETCURSEL
+    ${If} $0 == -1
+        MessageBox MB_ICONSTOP "Errore: nessun utente selezionato."
         Abort
     ${EndIf}
 
-    ; 3. Controllo Lettere (ASCII Check)
-    StrCpy $1 0 
-    LoopCheck:
-        IntCmp $1 $0 CheckDone
-        StrCpy $2 $UserNameEntered 1 $1 
-        System::Call '*(&t1 "$2") p .r3'
-        System::Call '*$3(&i1 .r4)'
-        System::Free $3
-        ${If} $4 >= 65
-        ${AndIf} $4 <= 90
-        ${ElseIf} $4 >= 97
-        ${AndIf} $4 <= 122
-        ${Else}
-            MessageBox MB_ICONSTOP "Il nome utente deve contenere SOLO lettere (A-Z). Carattere non valido: '$2'"
-            Abort
-        ${EndIf}
-        IntOp $1 $1 + 1
-        Goto LoopCheck
-    CheckDone:
+    ${NSD_GetText} $UserDropList $UserNameSelected
+    ${TrimNewLines} $UserNameSelected $UserNameSelected
 
-    ; 4. Controllo Esistenza (ExecWait con escape corretto)
-    SetDetailsPrint none
-    ExecWait "cmd /C net user $\"$UserNameEntered$\" > NUL 2>&1" $0
-    SetDetailsPrint both
-    
-    ${If} $0 == 0
-        MessageBox MB_ICONSTOP "L'utente '$UserNameEntered' esiste già. Scegline un altro."
+    StrLen $1 $UserNameSelected
+    ${If} $1 == 0
+        MessageBox MB_ICONSTOP "Errore: nome utente non valido."
         Abort
     ${EndIf}
+
+    MessageBox MB_YESNO \
+        "Confermi la configurazione dell'utente '$UserNameSelected' come Kiosk?$\\r$\\n$\\r$\\nATTENZIONE: al prossimo avvio l'utente vedrà solo l'applicazione." \
+        IDYES ok
+    Abort
+
+ok:
 FunctionEnd
+
+
 
 
 ; =========================================================
@@ -106,59 +157,57 @@ FunctionEnd
 ; =========================================================
 !macro customInstall
 
-    ; --- 1. Configurazione ---
+    ; --- 1. CONFIGURAZIONE FILE (Piazza/Marina) ---
     DetailPrint "Configurazione App ($TotemChoice)..."
     FileOpen $4 "$INSTDIR\kiosk.conf" w
     FileWrite $4 "kiosk_mode=1$\r$\n"
     FileWrite $4 "totem_id=$TotemChoice$\r$\n"
     FileClose $4
 
-    ; --- 2. Utente Windows ---
-    DetailPrint "Creazione utente '$UserNameEntered'..."
-
-    StrCpy $0 0
+    ; --- 2. COPIA RISORSE ESTERNE ---
+    DetailPrint "Installazione risorse (PDF, Traduzioni, Sponsor)..."
     
-    ; Sintassi ExecWait con virgolette interne escapeate
-    ExecWait "net user $\"$UserNameEntered$\" $\"$\" /ADD /fullname:$\"Kiosk User App$\" /comment:$\"Account Kiosk$\" /active:yes /passwordchg:no" $0
+    SetOutPath "$INSTDIR\translations"
+    File /nonfatal "$PROJECT_DIR\src\locales\*.yaml"
+
+    SetOutPath "$INSTDIR\orari-bus"
+    File /nonfatal "$PROJECT_DIR\src\bus-pdfs\*.pdf"
+
+    SetOutPath "$INSTDIR\sponsors"
+    File /nonfatal "$PROJECT_DIR\src\sponsors\*.jpg"
+    File /nonfatal "$PROJECT_DIR\src\sponsors\*.png"
     
-    ${If} $0 == 0
-        DetailPrint "Utente creato."
-        
-        ; WMIC
-        ExecWait "wmic useraccount where Name='${UserNameEntered}' set PasswordExpires=FALSE" $1
+    SetOutPath "$INSTDIR" ; Ripristina path
 
-        ; Gruppi
-        ExecWait "net localgroup Users $\"$UserNameEntered$\" /ADD"
-        ExecWait "net localgroup Administrators $\"$UserNameEntered$\" /DELETE"
-        
-        ; --- 3. CONFIGURAZIONE AUTOMATICA KIOSK (AUTOLOGON + SHELL) ---
-        DetailPrint "Impostazione AutoLogon e Shell..."
+    ; --- 3. CONFIGURAZIONE KIOSK USER ($UserNameSelected) ---
+    DetailPrint "Configurazione Account Kiosk: $UserNameSelected"
 
-        ; A) AUTOLOGON (HKLM)
-        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon" "1"
-        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName" "$UserNameEntered"
-        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultDomainName" "."
-        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultPassword" "" 
+    ; A) SICUREZZA: Rimuovi Admin e imposta come User Standard
+    ExecWait "net localgroup Administrators $\"$UserNameSelected$\" /DELETE"
+    ExecWait "net localgroup Users $\"$UserNameSelected$\" /ADD"
+    
+    ; B) PASSWORD: Rimuovi scadenza password
+    ExecWait "wmic useraccount where Name='${UserNameSelected}' set PasswordExpires=FALSE" $1
 
-        ; B) SHELL REPLACEMENT (RunOnce)
-        ; Usiamo StrCpy con apici SINGOLI ' per contenere la stringa complessa con doppi apici "
-        ; Questo evita l'errore "got 13 parameters".
-        ; Nota: le virgolette intorno al path del file exe sono escapeate per il comando REG (\")
-        
-        StrCpy $0 'cmd.exe /C "IF /I "%USERNAME%" == "$UserNameEntered" ( REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\KioskPaola.exe\"" /f & shutdown /r /t 0 )"'
-        
-        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" $0
+    ; C) AUTOLOGON (HKLM)
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon" "1"
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName" "$UserNameSelected"
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultDomainName" "."
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultPassword" "" 
 
-        DetailPrint "Configurazione completata. Al riavvio il Kiosk si configurerà."
-        MessageBox MB_OK "Utente '$UserNameEntered' creato e configurato.$\r$\nRiavvia il PC per attivare la modalità Kiosk."
-        
-    ${ElseIf} $0 == 2245
-        MessageBox MB_ICONSTOP "ERRORE: Policy Password attiva.$\r$\nImpossibile creare utente senza password.$\r$\nDisabilita 'Requisiti di complessità password' in secpol.msc."
-        Abort
-    ${Else}
-        MessageBox MB_ICONSTOP "Errore creazione utente. Codice: $0"
-        Abort
-    ${EndIf}
+    ; D) SHELL REPLACEMENT (La Trappola RunOnce)
+    DetailPrint "Impostazione Shell Replacement..."
+
+    ; Costruiamo il comando CMD complesso in una variabile.
+    ; Logica: IF %USERNAME% == KioskUser ( REG ADD HKCU...Shell... && SHUTDOWN )
+    StrCpy $0 'cmd.exe /C "IF /I "%USERNAME%" == "$UserNameSelected" ( REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\KioskPaola.exe\"" /f & shutdown /r /t 0 )"'
+    
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" $0
+
+    DetailPrint "Configurazione completata."
+    
+    ; --- CORREZIONE QUI SOTTO: Unica stringa continua ---
+    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entrerà automaticamente come '$UserNameSelected'.$\r$\n2. Il sistema si riavvierà una seconda volta per applicare la Kiosk Mode.$\r$\n3. Al termine, vedrai solo l'applicazione Kiosk."
 
 !macroend
 
@@ -169,6 +218,6 @@ FunctionEnd
     RMDir /r "$INSTDIR\translations"
     
     ; Pulizia AutoLogon
-    DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon"
-    DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName"
+    ; DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon"
+    ; DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName"
 !macroend

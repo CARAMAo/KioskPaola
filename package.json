@@ -7,7 +7,8 @@
     "dev": "vite",
     "start": "electron .",
     "build": "vite build",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:nsis":"electron-builder build --win nsis --prepackaged \"./release/win-unpacked\""
   },
   "keywords": [],
   "author": "",

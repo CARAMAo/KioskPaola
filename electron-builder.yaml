@@ -15,25 +15,30 @@ files:
   - package.json
 
 # Copia i file di localizzazione fuori dall'asar in resources/translations
-# extraResources:
-#   - from: src/locales
-#     to: translations
-#     filter:
-#       - "*.yaml"
+extraResources:
+  - from: src/locales
+    to: translations
+    filter:
+      - "*.yaml"
 
-#   - from: src/bus-pdfs
-#     to: bus-pdfs
-#     filter:
-#       - "*.pdf"
+  - from: src/bus-pdfs
+    to: bus-pdfs
+    filter:
+      - "*.pdf"
 
-#   - from: src/sponsors
-#     to: sponsors
+  - from: src/sponsors
+    to: sponsors
 
 win:
   target:
     - nsis
+    # - appx
   artifactName: Setup-${productName}-${version}.${ext}
   signAndEditExecutable: false
+  # Configurazione Certificato (per firmare l'APPX)
+  # signtoolOptions:
+  #   certificateFile: KioskPaolaKey.pfx
+  #   certificatePassword: password123
 
 # Configurazione per l'installer NSIS
 nsis:
@@ -43,7 +48,17 @@ nsis:
   include: build/installer.nsh
   runAfterFinish: false
   warningsAsErrors: false
+  allowElevation: true
 # Disabilita publish automatico
 publish:
   provider: generic
   url: ""
+# appx:
+#   applicationId: com.kioskpaola.app
+#   # Deve corrispondere ESATTAMENTE al "Subject" del certificato creato prima
+#   publisher: CN=KioskPaola
+#   publisherDisplayName: "KioskPaola Kiosk"
+#   # Colore di sfondo della tile nel menu start
+#   backgroundColor: "#ffffff"
+#   # Identità univoca (nome pacchetto)
+#   identityName: KioskPaola.App
