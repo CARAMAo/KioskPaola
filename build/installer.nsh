@@ -167,66 +167,79 @@ FunctionEnd
     ; --- 2. RISORSE ---
     DetailPrint "Installazione risorse..."
     SetOutPath "$INSTDIR\translations"
-    File /nonfatal "$PROJECT_DIR\src\locales\*.yaml"
+    File /nonfatal "${PROJECT_DIR}\src\locales\*.yaml"
     SetOutPath "$INSTDIR\orari-bus"
-    File /nonfatal "$PROJECT_DIR\src\bus-pdfs\*.pdf"
+    File /nonfatal "${PROJECT_DIR}\src\bus-pdfs\*.pdf"
     SetOutPath "$INSTDIR\sponsors"
-    File /nonfatal "$PROJECT_DIR\src\sponsors\*.jpg"
-    File /nonfatal "$PROJECT_DIR\src\sponsors\*.png"
+    File /nonfatal "${PROJECT_DIR}\src\sponsors\*.jpg"
+    File /nonfatal "${PROJECT_DIR}\src\sponsors\*.png"
     SetOutPath "$INSTDIR" 
-
+; --- 2. HARDENING DI SISTEMA (HKLM - No Swipe) ---
+    DetailPrint "Applicazione criteri di sicurezza..."
+    WriteRegStr HKLM "SOFTWARE\Policies\Microsoft\Windows\EdgeUI" "AllowEdgeSwipe" "0"
+    WriteRegDWORD HKLM "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" 0
+    
     ; --- 3. CONFIGURAZIONE UTENTE ---
     DetailPrint "Configurazione Account Kiosk: $UserNameSelected"
-
-    ; Permessi e Password
     ExecWait "net localgroup Administrators $\"$UserNameSelected$\" /DELETE"
     ExecWait "net localgroup Users $\"$UserNameSelected$\" /ADD"
     ExecWait "wmic useraccount where Name='${UserNameSelected}' set PasswordExpires=FALSE" $1
 
-    ; AutoLogon (HKLM)
+    ; AutoLogon
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon" "1"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName" "$UserNameSelected"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultDomainName" "."
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultPassword" "" 
 
-
-    ; --- 4. CREAZIONE SCRIPT DI INIZIALIZZAZIONE (SOLUZIONE BAT) ---
-    ; Invece di mettere il comando nel registro, creiamo un file .bat fisico.
-    ; Questo evita tutti i problemi di virgolette.
+    ; --- 4. CREAZIONE WATCHDOG (Il file che riavvia l'app se crasha) ---
+    ; Questo sarà il vero programma "Shell" di Windows.
+    DetailPrint "Creazione Watchdog (Auto-Restart)..."
     
-    DetailPrint "Creazione script di primo avvio..."
-    
-    FileOpen $4 "$INSTDIR\init_kiosk.bat" w
-    
-    ; Scriviamo il contenuto del batch riga per riga
+    FileOpen $4 "$INSTDIR\kiosk_watchdog.bat" w
     FileWrite $4 "@echo off$\r$\n"
+    FileWrite $4 ":LOOP$\r$\n"
+    FileWrite $4 "cls$\r$\n"
+    FileWrite $4 "echo Kiosk Watchdog: Avvio applicazione...$\r$\n"
     
-    ; LOGICA: Se l'utente NON è quello del Kiosk, esci subito e non fare nulla.
-    ; (Nota: usiamo $\" per scrivere le virgolette nel file)
-    FileWrite $4 'IF /I "%USERNAME%" NEQ "$UserNameSelected" GOTO END$\r$\n'
+    ; start /wait mette in pausa lo script finché l'app è aperta.
+    ; Se l'app crasha, il comando termina e lo script prosegue.
+    FileWrite $4 'start /wait "" "$INSTDIR\KioskPaola.exe"$\r$\n'
     
-    ; LOGICA: Imposta la Shell nel registro dell'utente corrente (HKCU)
-    ; Attenzione: $INSTDIR ha i backslash singoli, ma nel file bat vanno bene così.
-    FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\KioskPaola.exe\"" /f$\r$\n'
-    
-    ; LOGICA: Riavvia per applicare
-    FileWrite $4 "shutdown /r /t 0$\r$\n"
-    
-    FileWrite $4 ":END$\r$\n"
-    FileWrite $4 "EXIT$\r$\n"
-    
+    FileWrite $4 "echo L'applicazione si e' chiusa. Riavvio in 2 secondi...$\r$\n"
+    FileWrite $4 "timeout /t 2 /nobreak >nul$\r$\n"
+    FileWrite $4 "goto LOOP$\r$\n"
     FileClose $4
 
 
-    ; --- 5. IMPOSTAZIONE RUNONCE ---
-    ; Ora il registro deve solo lanciare questo file semplice.
-    ; Usiamo cmd /C start ... per nascondere la finestra il più possibile e lanciare in background
+    ; --- 5. CREAZIONE SCRIPT DI PRIMO AVVIO (Configurazione e Shell) ---
+    DetailPrint "Creazione script di setup..."
     
+    FileOpen $4 "$INSTDIR\init_kiosk.bat" w
+    FileWrite $4 "@echo off$\r$\n"
+    
+    ; Se l'utente non è quello del Kiosk, non fare nulla
+    FileWrite $4 'IF /I "%USERNAME%" NEQ "$UserNameSelected" GOTO END$\r$\n'
+    
+    ; --- HARDENING UTENTE (HKCU) ---
+    FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f$\r$\n'
+    FileWrite $4 'REG ADD "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d "506" /f$\r$\n'
+    FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications" /v ToastEnabled /t REG_DWORD /d 0 /f$\r$\n'
+    
+    ; --- IMPOSTAZIONE SHELL ---
+    ; Qui sta la magia: La Shell non è l'EXE, ma il WATCHDOG.BAT
+    FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\kiosk_watchdog.bat\"" /f$\r$\n'
+    
+    ; Riavvia
+    FileWrite $4 "shutdown /r /t 0$\r$\n"
+    FileWrite $4 ":END$\r$\n"
+    FileWrite $4 "EXIT$\r$\n"
+    FileClose $4
+
+    ; --- 6. RUNONCE ---
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" '"$INSTDIR\init_kiosk.bat"'
 
     DetailPrint "Configurazione completata."
-    
-    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entrerà automaticamente come '$UserNameSelected'.$\r$\n2. Uno script configurerà la modalità Kiosk e riavvierà il PC.$\r$\n3. Al secondo riavvio, partirà l'App."
+    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entra come '$UserNameSelected'.$\r$\n2. Lo script attiva le protezioni.$\r$\n3. Al riavvio successivo, partira' il Watchdog che terra' l'app sempre aperta."
 
 !macroend
 

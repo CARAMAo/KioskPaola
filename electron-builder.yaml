@@ -14,8 +14,7 @@ files:
   - preload.js
   - package.json
 
-# Copia i file di localizzazione fuori dall'asar in resources/translations
-extraResources:
+extraFiles:
   - from: src/locales
     to: translations
     filter:
