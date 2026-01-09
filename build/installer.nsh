@@ -2,6 +2,7 @@
 !include "LogicLib.nsh"
 !include "FileFunc.nsh" 
 !include "TextFunc.nsh"
+
 ; --- VARIABILI GLOBALI ---
 Var Dialog
 Var Label
@@ -10,16 +11,54 @@ Var RadioMarina
 Var TotemChoice
 
 ; Variabili per la selezione utente
-Var UserDropList ; Il controllo UI (combobox)
-Var UserNameSelected ; Il valore scelto (es. "Kiosk")
-Var HLine ; Handle per lettura file
-
-RequestExecutionLevel admin
+Var UserDropList
+Var UserNameSelected
 
 ; =========================================================
-; PAGINA 1: SCELTA TOTEM
+; MACRO PER IL LOGGING (Helper)
 ; =========================================================
+!macro LogText Message
+    Push $0
+    FileOpen $0 "$INSTDIR\install_log.txt" a
+    FileSeek $0 0 END
+    FileWrite $0 "${Message}$\r$\n"
+    FileClose $0
+    Pop $0
+    DetailPrint "${Message}"
+!endmacro
+
+!macro LogAndExec Command
+    Push $0
+    Push $1
+    ; Scrive il comando nel log
+    FileOpen $0 "$INSTDIR\install_log.txt" a
+    FileSeek $0 0 END
+    FileWrite $0 "[EXEC] ${Command}$\r$\n"
+    FileClose $0
+    
+    ; Esegue
+    DetailPrint "Esecuzione: ${Command}"
+    ExecWait '${Command}' $1
+    
+    ; Scrive il risultato
+    FileOpen $0 "$INSTDIR\install_log.txt" a
+    FileSeek $0 0 END
+    FileWrite $0 "[EXIT CODE] $1$\r$\n"
+    FileClose $0
+    Pop $1
+    Pop $0
+!endmacro
+
+; =========================================================
+; PAGINE UI (Totem & User Selection)
+; =========================================================
+; Queste funzioni devono essere registrate nel package.json o chiamate
+; dalle macro standard di electron-builder se supportato, 
+; oppure iniettate via nsis.include.
+; Assumo che la tua configurazione chiami già queste pagine.
+
 Page custom fnc_TotemPage_Show fnc_TotemPage_Leave
+Page custom fnc_UserSelect_Show fnc_UserSelect_Leave
 
 Function fnc_TotemPage_Show
     nsDialogs::Create 1018
@@ -46,13 +85,6 @@ Function fnc_TotemPage_Leave
     ${EndIf}
 FunctionEnd
 
-; =========================================================
-; PAGINA 2: SELEZIONE UTENTE ESISTENTE
-; =========================================================
-Page custom fnc_UserSelect_Show fnc_UserSelect_Leave
-
-; Definizioni API Windows
-; Definizioni API Windows (se non le hai già in cima al file)
 !define FILTER_NORMAL_ACCOUNT 0x0002
 !define NERR_Success 0
 
@@ -63,109 +95,68 @@ Function fnc_UserSelect_Show
         Abort
     ${EndIf}
 
-    ${NSD_CreateLabel} 0 0 100% 25u "Seleziona l'account locale che diventerà il Kiosk User.$\r$\n(Questo utente verrà impostato per il login automatico e l'avvio diretto dell'app)."
+    ${NSD_CreateLabel} 0 0 100% 25u "Seleziona l'account Kiosk (L'utente deve aver già effettuato l'accesso):"
     Pop $Label
-
-    ; Creiamo il menu a tendina
     ${NSD_CreateDropList} 0 35u 100% 80u ""
     Pop $UserDropList
 
-    ; --- 1. IDENTIFICA L'AMMINISTRATORE CORRENTE ---
-    ; Leggiamo il nome dell'utente che sta eseguendo l'installer per escluderlo dalla lista.
-    ; Usiamo il registro $8 per memorizzarlo.
     ReadEnvStr $8 "USERNAME"
-
-    ; --- 2. ENUMERAZIONE UTENTI (API NetUserEnum) ---
-    ; r0 = Buffer, r1 = EntriesRead, r2 = Total, r3 = Resume, r4 = Status
     System::Call 'netapi32::NetUserEnum(n, i 0, i ${FILTER_NORMAL_ACCOUNT}, *i .r0, i -1, *i .r1, *i .r2, *i .r3) i .r4'
 
     ${If} $4 == ${NERR_Success}
-        StrCpy $5 0  ; Contatore ciclo
-        StrCpy $6 $0 ; Puntatore buffer corrente
-
+        StrCpy $5 0 
+        StrCpy $6 $0 
         LoopUsers:
-            IntCmp $5 $1 DoneUsers ; Se abbiamo letto tutti gli utenti, fine
-
-            ; Leggi il nome utente corrente dal puntatore in memoria -> $7
+            IntCmp $5 $1 DoneUsers 
             System::Call "*$6(w .r7)"
-
-            ; --- FILTRI DI SICUREZZA ---
-            ; Salta utenti di sistema
             StrCmp $7 "Administrator" SkipUser
             StrCmp $7 "Guest" SkipUser
             StrCmp $7 "DefaultAccount" SkipUser
             StrCmp $7 "WDAGUtilityAccount" SkipUser
-            
-            ; --- FILTRO ANTI-LOCKOUT ---
-            ; Se l'utente trovato ($7) è uguale all'utente corrente ($8), SALTALO.
-            ; Questo impedisce all'admin di selezionare se stesso.
-            StrCmp $7 $8 SkipUser
-
-            ; Se passa i filtri, aggiungilo alla lista
+            StrCmp $7 $8 SkipUser 
             ${NSD_CB_AddString} $UserDropList $7
-
             SkipUser:
-            ; Avanza di 4 byte (dimensione puntatore su 32bit) o struct size
             IntOp $6 $6 + 4 
             IntOp $5 $5 + 1
             Goto LoopUsers
-
         DoneUsers:
-        ; Pulisci la memoria
         System::Call 'netapi32::NetApiBufferFree(i r0)'
-    ${Else}
-        MessageBox MB_ICONSTOP "Errore nell'enumerazione degli utenti (Codice: $4).$\r$\nImpossibile popolare la lista."
     ${EndIf}
-
-    ; Seleziona il primo elemento se disponibile
     ${NSD_CB_SelectString} $UserDropList 0
-
     nsDialogs::Show
 FunctionEnd
 
-
 Function fnc_UserSelect_Leave
-
-    SendMessage $UserDropList 0x0147 0 0 $0 ; CB_GETCURSEL
+    SendMessage $UserDropList 0x0147 0 0 $0 
     ${If} $0 == -1
         MessageBox MB_ICONSTOP "Errore: nessun utente selezionato."
         Abort
     ${EndIf}
-
     ${NSD_GetText} $UserDropList $UserNameSelected
     ${TrimNewLines} $UserNameSelected $UserNameSelected
-
-    StrLen $1 $UserNameSelected
-    ${If} $1 == 0
-        MessageBox MB_ICONSTOP "Errore: nome utente non valido."
-        Abort
-    ${EndIf}
-
-    MessageBox MB_YESNO \
-        "Confermi la configurazione dell'utente '$UserNameSelected' come Kiosk?$\\r$\\n$\\r$\\nATTENZIONE: al prossimo avvio l'utente vedrà solo l'applicazione." \
-        IDYES ok
-    Abort
-
-ok:
 FunctionEnd
 
-
-
-
 ; =========================================================
-; INSTALLAZIONE
+; INSTALLAZIONE (Macro customInstall)
 ; =========================================================
 !macro customInstall
 
+    ; --- 0. INIZIALIZZA LOG ---
+    FileOpen $4 "$INSTDIR\install_log.txt" w
+    FileWrite $4 "--- INSTALLAZIONE KIOSK (Electron-Builder) ---$\r$\n"
+    FileWrite $4 "User Selected: $UserNameSelected$\r$\n"
+    FileWrite $4 "Totem Type: $TotemChoice$\r$\n"
+    FileClose $4
+
     ; --- 1. CONFIGURAZIONE FILE ---
-    DetailPrint "Configurazione App ($TotemChoice)..."
+    ${LogText} "Scrittura file di configurazione..."
     FileOpen $4 "$INSTDIR\kiosk.conf" w
     FileWrite $4 "kiosk_mode=1$\r$\n"
     FileWrite $4 "totem_id=$TotemChoice$\r$\n"
     FileClose $4
 
-    ; --- 2. RISORSE ---
-    DetailPrint "Installazione risorse..."
+    ; --- 2. RISORSE (Simulate, electron-builder gestisce i file principali) ---
+    ${LogText} "Copia risorse aggiuntive..."
     SetOutPath "$INSTDIR\translations"
     File /nonfatal "${PROJECT_DIR}\src\locales\*.yaml"
     SetOutPath "$INSTDIR\orari-bus"
@@ -174,82 +165,109 @@ FunctionEnd
     File /nonfatal "${PROJECT_DIR}\src\sponsors\*.jpg"
     File /nonfatal "${PROJECT_DIR}\src\sponsors\*.png"
     SetOutPath "$INSTDIR" 
-; --- 2. HARDENING DI SISTEMA (HKLM - No Swipe) ---
-    DetailPrint "Applicazione criteri di sicurezza..."
+
+    ; --- 3. HARDENING SISTEMA (HKLM) ---
+    ${LogText} "Applicazione policy di sistema (HKLM)..."
     WriteRegStr HKLM "SOFTWARE\Policies\Microsoft\Windows\EdgeUI" "AllowEdgeSwipe" "0"
     WriteRegDWORD HKLM "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" 0
     
-    ; --- 3. CONFIGURAZIONE UTENTE ---
-    DetailPrint "Configurazione Account Kiosk: $UserNameSelected"
-    ExecWait "net localgroup Administrators $\"$UserNameSelected$\" /DELETE"
-    ExecWait "net localgroup Users $\"$UserNameSelected$\" /ADD"
-    ExecWait "wmic useraccount where Name='${UserNameSelected}' set PasswordExpires=FALSE" $1
+    ; --- 4. CONFIGURAZIONE UTENTE ---
+    ${LogText} "Configurazione permessi account..."
+    
+    ; Utilizzo della macro LogAndExec per tracciare i comandi
+    ${LogAndExec} 'net localgroup Administrators "$UserNameSelected" /DELETE'
+    ${LogAndExec} 'net localgroup Users "$UserNameSelected" /ADD'
+    ${LogAndExec} 'wmic useraccount where Name="$UserNameSelected" set PasswordExpires=FALSE'
 
     ; AutoLogon
+    ${LogText} "Impostazione AutoLogon..."
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon" "1"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName" "$UserNameSelected"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultDomainName" "."
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultPassword" "" 
 
-    ; --- 4. CREAZIONE WATCHDOG (Il file che riavvia l'app se crasha) ---
-    ; Questo sarà il vero programma "Shell" di Windows.
-    DetailPrint "Creazione Watchdog (Auto-Restart)..."
-    
+    ; --- 5. CREAZIONE WATCHDOG (Shell Loop) ---
+    ${LogText} "Creazione script Watchdog..."
     FileOpen $4 "$INSTDIR\kiosk_watchdog.bat" w
     FileWrite $4 "@echo off$\r$\n"
     FileWrite $4 ":LOOP$\r$\n"
     FileWrite $4 "cls$\r$\n"
     FileWrite $4 "echo Kiosk Watchdog: Avvio applicazione...$\r$\n"
-    
-    ; start /wait mette in pausa lo script finché l'app è aperta.
-    ; Se l'app crasha, il comando termina e lo script prosegue.
     FileWrite $4 'start /wait "" "$INSTDIR\KioskPaola.exe"$\r$\n'
-    
     FileWrite $4 "echo L'applicazione si e' chiusa. Riavvio in 2 secondi...$\r$\n"
     FileWrite $4 "timeout /t 2 /nobreak >nul$\r$\n"
     FileWrite $4 "goto LOOP$\r$\n"
     FileClose $4
 
-
-    ; --- 5. CREAZIONE SCRIPT DI PRIMO AVVIO (Configurazione e Shell) ---
-    DetailPrint "Creazione script di setup..."
+    ; --- 6. CREAZIONE SCRIPT DI PRIMO AVVIO (Init) ---
+    ${LogText} "Creazione script di setup iniziale (init_kiosk.bat)..."
     
     FileOpen $4 "$INSTDIR\init_kiosk.bat" w
     FileWrite $4 "@echo off$\r$\n"
     
-    ; Se l'utente non è quello del Kiosk, non fare nulla
-    FileWrite $4 'IF /I "%USERNAME%" NEQ "$UserNameSelected" GOTO END$\r$\n'
+    ; Log interno al batch per debug
+    FileWrite $4 'ECHO [BATCH] Start setup per %USERNAME% >> "$INSTDIR\install_log.txt"$\r$\n'
     
-    ; --- HARDENING UTENTE (HKCU) ---
+    ; Controllo Username
+    FileWrite $4 'IF /I "%USERNAME%" NEQ "$UserNameSelected" ( ECHO [BATCH] Utente errato. Esco. >> "$INSTDIR\install_log.txt" & GOTO END )$\r$\n'
+    
+    ; Hardening HKCU
     FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f$\r$\n'
     FileWrite $4 'REG ADD "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d "506" /f$\r$\n'
     FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications" /v ToastEnabled /t REG_DWORD /d 0 /f$\r$\n'
     
-    ; --- IMPOSTAZIONE SHELL ---
-    ; Qui sta la magia: La Shell non è l'EXE, ma il WATCHDOG.BAT
+    ; IMPOSTAZIONE SHELL -> WATCHDOG
     FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\kiosk_watchdog.bat\"" /f$\r$\n'
     
-    ; Riavvia
+    ; *** AUTODISTRUZIONE DAL STARTUP ***
+    FileWrite $4 'DEL "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\setup_kiosk.lnk"$\r$\n'
+    
+    FileWrite $4 'ECHO [BATCH] Configurazione completata. Riavvio... >> "$INSTDIR\install_log.txt"$\r$\n'
     FileWrite $4 "shutdown /r /t 0$\r$\n"
     FileWrite $4 ":END$\r$\n"
     FileWrite $4 "EXIT$\r$\n"
     FileClose $4
 
-    ; --- 6. RUNONCE ---
-    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" '"$INSTDIR\init_kiosk.bat"'
+    ; --- 7. FIX DEFINITIVO: LINK DIRETTO NELLO STARTUP DELL'UTENTE ---
+    ; Poiché siamo Admin, possiamo scrivere nella cartella dell'utente.
+    ; Supponiamo che l'utente esista già e abbia fatto accesso (quindi la cartella esiste).
+    
+    ${LogText} "Creazione collegamento in Esecuzione Automatica per $UserNameSelected..."
+    
+    ; Costruzione percorso Startup dell'utente target
+    StrCpy $R0 "C:\Users\$UserNameSelected\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+    
+    ; Controllo esistenza cartella (Sicurezza)
+    IfFileExists "$R0\*.*" PathFound PathNotFound
 
-    DetailPrint "Configurazione completata."
-    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entra come '$UserNameSelected'.$\r$\n2. Lo script attiva le protezioni.$\r$\n3. Al riavvio successivo, partira' il Watchdog che terra' l'app sempre aperta."
+    PathNotFound:
+        ${LogText} "ERRORE CRITICO: Cartella Startup non trovata in $R0"
+        MessageBox MB_ICONSTOP "Errore: L'utente '$UserNameSelected' non ha una cartella utente.$\r$\nAssicurati di aver fatto il login con quell'utente almeno una volta!"
+        Abort
+
+    PathFound:
+        ; Creazione del link
+        CreateShortCut "$R0\setup_kiosk.lnk" "$INSTDIR\init_kiosk.bat"
+        ${LogText} "Link creato con successo in: $R0\setup_kiosk.lnk"
+
+    ${LogText} "Installazione Completata."
+    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nLog: $INSTDIR\install_log.txt$\r$\nAl riavvio, il sistema farà login automatico e configurerà l'utente."
 
 !macroend
 
+; =========================================================
+; DISINSTALLAZIONE (Macro customUnInstall)
+; =========================================================
 !macro customUnInstall
     Delete "$INSTDIR\kiosk.conf"
+    Delete "$INSTDIR\install_log.txt" ; Rimuove il log alla disinstallazione
+    Delete "$INSTDIR\kiosk_watchdog.bat"
+    Delete "$INSTDIR\init_kiosk.bat"
+    
     RMDir /r "$INSTDIR\orari-bus"
     RMDir /r "$INSTDIR\sponsors"
     RMDir /r "$INSTDIR\translations"
     
-    ; Pulizia AutoLogon
-    ; DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon"
-    ; DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName"
+    ; Nota: Non rimuoviamo le chiavi di registro di sistema per evitare di rompere policy globali,
+    ; ma potresti voler rimuovere l'AutoLogon se necessario.
 !macroend
