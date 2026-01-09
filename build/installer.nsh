@@ -157,57 +157,76 @@ FunctionEnd
 ; =========================================================
 !macro customInstall
 
-    ; --- 1. CONFIGURAZIONE FILE (Piazza/Marina) ---
+    ; --- 1. CONFIGURAZIONE FILE ---
     DetailPrint "Configurazione App ($TotemChoice)..."
     FileOpen $4 "$INSTDIR\kiosk.conf" w
     FileWrite $4 "kiosk_mode=1$\r$\n"
     FileWrite $4 "totem_id=$TotemChoice$\r$\n"
     FileClose $4
 
-    ; --- 2. COPIA RISORSE ESTERNE ---
-    DetailPrint "Installazione risorse (PDF, Traduzioni, Sponsor)..."
-    
+    ; --- 2. RISORSE ---
+    DetailPrint "Installazione risorse..."
     SetOutPath "$INSTDIR\translations"
     File /nonfatal "$PROJECT_DIR\src\locales\*.yaml"
-
     SetOutPath "$INSTDIR\orari-bus"
     File /nonfatal "$PROJECT_DIR\src\bus-pdfs\*.pdf"
-
     SetOutPath "$INSTDIR\sponsors"
     File /nonfatal "$PROJECT_DIR\src\sponsors\*.jpg"
     File /nonfatal "$PROJECT_DIR\src\sponsors\*.png"
-    
-    SetOutPath "$INSTDIR" ; Ripristina path
+    SetOutPath "$INSTDIR" 
 
-    ; --- 3. CONFIGURAZIONE KIOSK USER ($UserNameSelected) ---
+    ; --- 3. CONFIGURAZIONE UTENTE ---
     DetailPrint "Configurazione Account Kiosk: $UserNameSelected"
 
-    ; A) SICUREZZA: Rimuovi Admin e imposta come User Standard
+    ; Permessi e Password
     ExecWait "net localgroup Administrators $\"$UserNameSelected$\" /DELETE"
     ExecWait "net localgroup Users $\"$UserNameSelected$\" /ADD"
-    
-    ; B) PASSWORD: Rimuovi scadenza password
     ExecWait "wmic useraccount where Name='${UserNameSelected}' set PasswordExpires=FALSE" $1
 
-    ; C) AUTOLOGON (HKLM)
+    ; AutoLogon (HKLM)
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "AutoAdminLogon" "1"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultUserName" "$UserNameSelected"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultDomainName" "."
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" "DefaultPassword" "" 
 
-    ; D) SHELL REPLACEMENT (La Trappola RunOnce)
-    DetailPrint "Impostazione Shell Replacement..."
 
-    ; Costruiamo il comando CMD complesso in una variabile.
-    ; Logica: IF %USERNAME% == KioskUser ( REG ADD HKCU...Shell... && SHUTDOWN )
-    StrCpy $0 'cmd.exe /C "IF /I "%USERNAME%" == "$UserNameSelected" ( REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\KioskPaola.exe\"" /f & shutdown /r /t 0 )"'
+    ; --- 4. CREAZIONE SCRIPT DI INIZIALIZZAZIONE (SOLUZIONE BAT) ---
+    ; Invece di mettere il comando nel registro, creiamo un file .bat fisico.
+    ; Questo evita tutti i problemi di virgolette.
     
-    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" $0
+    DetailPrint "Creazione script di primo avvio..."
+    
+    FileOpen $4 "$INSTDIR\init_kiosk.bat" w
+    
+    ; Scriviamo il contenuto del batch riga per riga
+    FileWrite $4 "@echo off$\r$\n"
+    
+    ; LOGICA: Se l'utente NON è quello del Kiosk, esci subito e non fare nulla.
+    ; (Nota: usiamo $\" per scrivere le virgolette nel file)
+    FileWrite $4 'IF /I "%USERNAME%" NEQ "$UserNameSelected" GOTO END$\r$\n'
+    
+    ; LOGICA: Imposta la Shell nel registro dell'utente corrente (HKCU)
+    ; Attenzione: $INSTDIR ha i backslash singoli, ma nel file bat vanno bene così.
+    FileWrite $4 'REG ADD "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Shell /d "\"$INSTDIR\KioskPaola.exe\"" /f$\r$\n'
+    
+    ; LOGICA: Riavvia per applicare
+    FileWrite $4 "shutdown /r /t 0$\r$\n"
+    
+    FileWrite $4 ":END$\r$\n"
+    FileWrite $4 "EXIT$\r$\n"
+    
+    FileClose $4
+
+
+    ; --- 5. IMPOSTAZIONE RUNONCE ---
+    ; Ora il registro deve solo lanciare questo file semplice.
+    ; Usiamo cmd /C start ... per nascondere la finestra il più possibile e lanciare in background
+    
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" "SetupKioskShell" '"$INSTDIR\init_kiosk.bat"'
 
     DetailPrint "Configurazione completata."
     
-    ; --- CORREZIONE QUI SOTTO: Unica stringa continua ---
-    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entrerà automaticamente come '$UserNameSelected'.$\r$\n2. Il sistema si riavvierà una seconda volta per applicare la Kiosk Mode.$\r$\n3. Al termine, vedrai solo l'applicazione Kiosk."
+    MessageBox MB_OK "Installazione Completata!$\r$\n$\r$\nAl riavvio:$\r$\n1. Windows entrerà automaticamente come '$UserNameSelected'.$\r$\n2. Uno script configurerà la modalità Kiosk e riavvierà il PC.$\r$\n3. Al secondo riavvio, partirà l'App."
 
 !macroend
 
