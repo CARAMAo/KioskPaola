@@ -14,19 +14,19 @@ files:
   - preload.js
   - package.json
 
-extraFiles:
-  - from: src/locales
-    to: translations
-    filter:
-      - "*.yaml"
+# extraFiles:
+#   - from: src/locales
+#     to: translations
+#     filter:
+#       - "*.yaml"
 
-  - from: src/bus-pdfs
-    to: bus-pdfs
-    filter:
-      - "*.pdf"
+#   - from: src/bus-pdfs
+#     to: bus-pdfs
+#     filter:
+#       - "*.pdf"
 
-  - from: src/sponsors
-    to: sponsors
+#   - from: src/sponsors
+#     to: sponsors
 
 win:
   target:

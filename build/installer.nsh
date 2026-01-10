@@ -186,6 +186,7 @@ FunctionEnd
     File /nonfatal "${PROJECT_DIR}\src\bus-pdfs\*.pdf"
     SetOutPath "$INSTDIR\sponsors"
     File /nonfatal "${PROJECT_DIR}\src\sponsors\*.jpg"
+    File /nonfatal "${PROJECT_DIR}\src\sponsors\*.jpeg"
     File /nonfatal "${PROJECT_DIR}\src\sponsors\*.png"
     SetOutPath "$INSTDIR" 
 
