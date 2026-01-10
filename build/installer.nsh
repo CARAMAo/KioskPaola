@@ -19,6 +19,10 @@ Var IsKioskSelected ; 1 = Sì, 0 = No (Modalità Desktop normale)
 Var UserDropList
 Var UserNameSelected
 
+!ifndef WM_SETTEXT
+  !define WM_SETTEXT 0x000C
+!endif
+
 ; =========================================================
 ; DEFINIZIONI E PAGINE
 ; =========================================================
@@ -30,6 +34,11 @@ Page custom fnc_TotemPage_Show fnc_TotemPage_Leave
 Page custom fnc_UserSelect_Show fnc_UserSelect_Leave
 
 Function fnc_TotemPage_Show
+    GetDlgItem $0 $HWNDPARENT 1037
+    SendMessage $0 ${WM_SETTEXT} 0 "STR:Configurazione Totem"
+    GetDlgItem $0 $HWNDPARENT 1038
+    SendMessage $0 ${WM_SETTEXT} 0 "STR:Scegli la tipologia di installazione e la modalità operativa."
+
     nsDialogs::Create 1018
     Pop $Dialog
     ${If} $Dialog == error
@@ -53,7 +62,7 @@ Function fnc_TotemPage_Show
     Pop $CheckboxKiosk
     
     ; Descrizione esplicativa
-    ${NSD_CreateLabel} 12u 75u 90% 40u "Selezionando questa opzione, l'installer configurerà l'utente selezionato per l'avvio automatico, disabiliterà funzioni di Windows e imposterà il riavvio automatico dell'app.$\r$\nDeselezionare per installare su un normale PC di test."
+    ${NSD_CreateLabel} 12u 75u 90% 40u "Selezionando questa opzione, l'installer configurerà l'utente selezionato per l'avvio automatico, e imposterà il riavvio automatico dell'app.$\r$\nDeselezionare per installare l'app come un normale programma."
     Pop $LabelKioskDesc
     
     ; Default check (Lo mettiamo attivo di default per sicurezza sui totem)
@@ -87,13 +96,18 @@ Function fnc_UserSelect_Show
         Abort
     ${EndIf}
 
+    GetDlgItem $0 $HWNDPARENT 1037
+    SendMessage $0 ${WM_SETTEXT} 0 "STR:Selezione Utente Kiosk"
+    GetDlgItem $0 $HWNDPARENT 1038
+    SendMessage $0 ${WM_SETTEXT} 0 "STR:Seleziona l'account locale che eseguirà l'applicazione."
+
     nsDialogs::Create 1018
     Pop $Dialog
     ${If} $Dialog == error
         Abort
     ${EndIf}
 
-    ${NSD_CreateLabel} 0 0 100% 25u "Seleziona l'account Kiosk (L'utente deve aver già effettuato l'accesso):"
+    ${NSD_CreateLabel} 0 0 100% 25u "Seleziona l'account Kiosk (L'utente deve aver già effettuato l'accesso precedentemente):"
     Pop $Label
     ${NSD_CreateDropList} 0 35u 100% 80u ""
     Pop $UserDropList
